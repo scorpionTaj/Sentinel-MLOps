@@ -1,8 +1,15 @@
 from __future__ import annotations
 
 import os
+import sys
+import tempfile
 from pathlib import Path
 from uuid import uuid4
+
+# Ensure src/ is in sys.path when executed in serverless environments (e.g. Vercel)
+_SRC_DIR = str(Path(__file__).resolve().parent.parent)
+if _SRC_DIR not in sys.path:
+    sys.path.insert(0, _SRC_DIR)
 
 from fastapi import FastAPI, HTTPException, Query, Response
 from fastapi.responses import FileResponse
@@ -26,13 +33,40 @@ class PredictionResponse(BaseModel):
     route: str
 
 
+def _resolve_runtime_dir(state_dir: Path | None = None) -> Path:
+    if state_dir is not None:
+        return state_dir
+    if "SENTINEL_STATE_DIR" in os.environ:
+        return Path(os.environ["SENTINEL_STATE_DIR"])
+    # Serverless runtimes (e.g. Vercel, AWS Lambda) have read-only filesystems; only /tmp is writable
+    if os.getenv("VERCEL") or os.getenv("AWS_LAMBDA_FUNCTION_NAME"):
+        tmp_dir = Path(tempfile.gettempdir()) / "sentinel" / "runtime"
+        tmp_dir.mkdir(parents=True, exist_ok=True)
+        return tmp_dir
+    local_dir = Path("data/runtime")
+    try:
+        local_dir.mkdir(parents=True, exist_ok=True)
+        test_file = local_dir / ".write_test"
+        test_file.touch()
+        test_file.unlink()
+        return local_dir
+    except (OSError, PermissionError):
+        tmp_dir = Path(tempfile.gettempdir()) / "sentinel" / "runtime"
+        tmp_dir.mkdir(parents=True, exist_ok=True)
+        return tmp_dir
+
+
 def create_app(state_dir: Path | None = None) -> FastAPI:
     app = FastAPI(title="Sentinel Self-Healing MLOps", version="0.1.0")
-    runtime_dir = state_dir or Path(os.getenv("SENTINEL_STATE_DIR", "data/runtime"))
+    runtime_dir = _resolve_runtime_dir(state_dir)
     config = HealingConfig(
         canary_min_observations=int(os.getenv("SENTINEL_CANARY_OBSERVATIONS", "150"))
     )
-    web_dir = Path(__file__).with_name("web")
+    web_dir = Path(__file__).resolve().parent / "web"
+    if not web_dir.exists():
+        candidate = Path("src/sentinel/web")
+        if candidate.exists():
+            web_dir = candidate.resolve()
 
     def new_loop() -> HealingLoop:
         created = HealingLoop(runtime_dir, config)
@@ -43,19 +77,29 @@ def create_app(state_dir: Path | None = None) -> FastAPI:
         return app.state.healing_loop
 
     app.state.healing_loop = new_loop()
-    app.mount("/assets", StaticFiles(directory=web_dir), name="assets")
+    if web_dir.exists():
+        app.mount("/assets", StaticFiles(directory=web_dir), name="assets")
 
     @app.get("/", include_in_schema=False)
-    def dashboard() -> FileResponse:
-        return FileResponse(web_dir / "index.html")
+    def dashboard() -> Response:
+        index_file = web_dir / "index.html"
+        if index_file.exists():
+            return FileResponse(index_file)
+        return Response("Sentinel Self-Healing MLOps API Online", media_type="text/plain")
 
     @app.get("/styles.css", include_in_schema=False)
-    def dashboard_styles() -> FileResponse:
-        return FileResponse(web_dir / "styles.css")
+    def dashboard_styles() -> Response:
+        styles_file = web_dir / "styles.css"
+        if styles_file.exists():
+            return FileResponse(styles_file)
+        raise HTTPException(status_code=404, detail="styles.css not found")
 
     @app.get("/app.js", include_in_schema=False)
-    def dashboard_script() -> FileResponse:
-        return FileResponse(web_dir / "app.js")
+    def dashboard_script() -> Response:
+        script_file = web_dir / "app.js"
+        if script_file.exists():
+            return FileResponse(script_file)
+        raise HTTPException(status_code=404, detail="app.js not found")
 
     @app.get("/health")
     def health() -> dict[str, str]:
