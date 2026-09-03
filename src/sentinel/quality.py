@@ -15,6 +15,10 @@ class DataQualityError(ValueError):
 class QualityGate:
     """Enforces the Gold-table contract at a single seam."""
 
+    def __init__(self, max_rul: float = 400.0, max_op_condition: float = 50.0) -> None:
+        self.max_rul = max_rul
+        self.max_op_condition = max_op_condition
+
     def validate(self, rows: list[FeatureRow]) -> GateReport:
         failures: list[str] = []
         if not rows:
@@ -25,10 +29,12 @@ class QualityGate:
                 continue
             if not all(math.isfinite(value) for value in (*row.values, row.target)):
                 failures.append(f"row {index}: non-finite value")
-            if row.target < 0 or row.target > 200:
-                failures.append(f"row {index}: RUL outside [0, 200]")
-            if abs(row.values[1]) > 5:
-                failures.append(f"row {index}: operating condition outside [-5, 5]")
+            if row.target < 0 or row.target > self.max_rul:
+                failures.append(f"row {index}: RUL outside [0, {self.max_rul}]")
+            if abs(row.values[1]) > self.max_op_condition:
+                failures.append(
+                    f"row {index}: operating condition outside [-{self.max_op_condition}, {self.max_op_condition}]"
+                )
             if len(failures) >= 20:
                 failures.append("additional failures omitted")
                 break

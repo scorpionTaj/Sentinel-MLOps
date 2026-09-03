@@ -5,6 +5,8 @@ __pycache__/
 .ruff_cache/
 data/runtime/*
 !data/runtime/.gitkeep
+data/reference/*.txt
+!data/reference/.gitkeep
 *.egg-info/
 uv.lock
 

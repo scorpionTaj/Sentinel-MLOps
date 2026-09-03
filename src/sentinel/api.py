@@ -154,16 +154,26 @@ def create_app(state_dir: Path | None = None) -> FastAPI:
     def simulate_drift(
         domain: str = Query(default="FD002", pattern=drift_pattern)
     ) -> dict[str, object]:
-        seeds = {
-            "FD002": 99,
-            "FD003": 199,
-            "FD004": 299,
-            "SENSOR_BIAS": 399,
-            "SENSOR_DROPOUT": 499,
-        }
-        seed = seeds.get(domain, 99)
-        offset = 500 + int(loop().status()["gold_rows"])
-        rows = generate_telemetry(domain, engines=3, cycles=35, seed=seed, engine_offset=offset)
+        target_domain = domain.upper()
+        ref_file = Path("data/reference") / f"train_{target_domain}.txt"
+        if ref_file.exists():
+            from sentinel.datasets import load_cmapps_training
+
+            all_rows = load_cmapps_training(ref_file, target_domain)
+            gold_count = int(loop().status()["gold_rows"])
+            start_idx = gold_count % max(1, len(all_rows) - 150)
+            rows = all_rows[start_idx : start_idx + 150]
+        else:
+            seeds = {
+                "FD002": 99,
+                "FD003": 199,
+                "FD004": 299,
+                "SENSOR_BIAS": 399,
+                "SENSOR_DROPOUT": 499,
+            }
+            seed = seeds.get(domain, 99)
+            offset = 500 + int(loop().status()["gold_rows"])
+            rows = generate_telemetry(domain, engines=3, cycles=35, seed=seed, engine_offset=offset)
         return loop().process(rows).to_dict()
 
     @app.post("/simulate-regression")
