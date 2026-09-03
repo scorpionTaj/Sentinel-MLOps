@@ -6,4 +6,5 @@ __pycache__/
 data/runtime/*
 !data/runtime/.gitkeep
 *.egg-info/
+uv.lock
 
