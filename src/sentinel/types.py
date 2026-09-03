@@ -38,6 +38,9 @@ class DriftReport:
     feature_psi: dict[str, float]
     threshold: float
 
+    def to_dict(self) -> dict[str, object]:
+        return asdict(self)
+
 
 @dataclass(frozen=True, slots=True)
 class PipelineEvent:

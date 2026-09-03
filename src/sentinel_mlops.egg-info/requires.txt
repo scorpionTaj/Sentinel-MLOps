@@ -1,0 +1,11 @@
+numpy<3,>=2.0
+
+[api]
+fastapi<1,>=0.116
+uvicorn[standard]<1,>=0.35
+
+[dev]
+fastapi<1,>=0.116
+httpx<1,>=0.28
+pytest<9,>=8.4
+ruff<1,>=0.12

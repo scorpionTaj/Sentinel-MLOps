@@ -7,6 +7,7 @@ import tempfile
 from pathlib import Path
 
 from sentinel.loop import HealingConfig, HealingLoop
+from sentinel.scenarios import drift_scenario_ids
 from sentinel.synthetic import generate_telemetry
 
 
@@ -43,7 +44,7 @@ def run_demo(state_dir: Path, scenario: str, reset: bool = False) -> dict[str, o
 
 def run_dataset_matrix() -> dict[str, object]:
     outcomes: dict[str, object] = {}
-    for index, domain in enumerate(("FD002", "FD003", "FD004"), start=1):
+    for index, domain in enumerate(drift_scenario_ids(), start=1):
         with tempfile.TemporaryDirectory(prefix=f"sentinel-{domain.lower()}-") as temporary:
             loop = HealingLoop(
                 Path(temporary),

@@ -14,7 +14,15 @@ def generate_telemetry(
 ) -> list[TelemetryRow]:
     """Generate C-MAPSS-shaped telemetry with controllable concept drift."""
 
-    supported = {"FD001", "FD002", "FD003", "FD004", "ADVERSARIAL"}
+    supported = {
+        "FD001",
+        "FD002",
+        "FD003",
+        "FD004",
+        "SENSOR_BIAS",
+        "SENSOR_DROPOUT",
+        "ADVERSARIAL",
+    }
     if domain not in supported:
         raise ValueError(f"domain must be one of {', '.join(sorted(supported))}")
     rng = np.random.default_rng(seed)
@@ -64,6 +72,24 @@ def generate_telemetry(
                     0.12 + 0.78 * health**2 - condition + rng.normal(0, 0.024),
                     0.48 * health - 0.18 * fault + condition + rng.normal(0, 0.024),
                     1.28 - 0.62 * health + 0.2 * fault**2 + rng.normal(0, 0.024),
+                )
+            elif domain == "SENSOR_BIAS":
+                operating = float(rng.normal(0.0, 0.04))
+                sensors = (
+                    health + 0.45 + rng.normal(0, 0.018),
+                    1.8 * health + 0.35 + rng.normal(0, 0.025),
+                    0.45 * health - 0.25 + rng.normal(0, 0.02),
+                    0.3 + 0.5 * health + 0.30 + rng.normal(0, 0.02),
+                    1.1 - health - 0.40 + rng.normal(0, 0.02),
+                )
+            elif domain == "SENSOR_DROPOUT":
+                operating = float(rng.normal(0.0, 0.04))
+                sensors = (
+                    0.05 + rng.normal(0, 0.01),
+                    1.8 * health + rng.normal(0, 0.025),
+                    0.02 + rng.normal(0, 0.01),
+                    0.3 + 0.5 * health + rng.normal(0, 0.02),
+                    0.05 + rng.normal(0, 0.01),
                 )
             else:
                 operating = float(rng.normal(1.15, 0.08))

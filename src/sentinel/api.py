@@ -11,6 +11,7 @@ from pydantic import BaseModel, Field
 
 from sentinel.features import FEATURE_NAMES
 from sentinel.loop import HealingConfig, HealingLoop
+from sentinel.scenarios import all_scenarios, drift_scenario_ids
 from sentinel.synthetic import generate_telemetry
 
 
@@ -64,6 +65,13 @@ def create_app(state_dir: Path | None = None) -> FastAPI:
     def status() -> dict[str, object]:
         return loop().status()
 
+    @app.get("/datasets")
+    def datasets() -> dict[str, object]:
+        return {
+            "baseline": "FD001",
+            "datasets": [scenario.to_dict() for scenario in all_scenarios()],
+        }
+
     @app.get("/metrics", response_class=Response)
     def metrics() -> Response:
         return Response(loop().metrics.render(), media_type="text/plain; version=0.0.4")
@@ -78,11 +86,20 @@ def create_app(state_dir: Path | None = None) -> FastAPI:
             prediction=result.value, model_version=result.model_version, route=result.route
         )
 
+    drift_pattern = f"^({'|'.join(drift_scenario_ids())})$"
+
     @app.post("/simulate-drift")
     def simulate_drift(
-        domain: str = Query(default="FD002", pattern="^FD00[234]$")
+        domain: str = Query(default="FD002", pattern=drift_pattern)
     ) -> dict[str, object]:
-        seed = {"FD002": 99, "FD003": 199, "FD004": 299}[domain]
+        seeds = {
+            "FD002": 99,
+            "FD003": 199,
+            "FD004": 299,
+            "SENSOR_BIAS": 399,
+            "SENSOR_DROPOUT": 499,
+        }
+        seed = seeds.get(domain, 99)
         offset = 500 + int(loop().status()["gold_rows"])
         rows = generate_telemetry(domain, engines=3, cycles=35, seed=seed, engine_offset=offset)
         return loop().process(rows).to_dict()

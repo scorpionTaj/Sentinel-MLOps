@@ -30,3 +30,10 @@ addopts = "-q"
 [tool.ruff]
 line-length = 100
 target-version = "py311"
+src = ["src"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["sentinel"]
+
+[tool.vercel]
+entrypoint = "src.sentinel.api:app"

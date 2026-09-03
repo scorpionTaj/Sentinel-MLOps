@@ -12,7 +12,7 @@ from sentinel.model import RidgeModel, mae
 from sentinel.quality import DataQualityError, QualityGate
 from sentinel.registry import FileModelRegistry
 from sentinel.router import CanaryRouter, Prediction
-from sentinel.types import BatchResult, FeatureRow, PipelineEvent, TelemetryRow
+from sentinel.types import BatchResult, DriftReport, FeatureRow, PipelineEvent, TelemetryRow
 
 
 @dataclass(frozen=True, slots=True)
@@ -44,6 +44,7 @@ class HealingLoop:
         self._sequence = 0
         self._gold: list[FeatureRow] = []
         self._bootstrapped = False
+        self._last_drift: DriftReport | None = None
 
     def bootstrap(self, rows: list[TelemetryRow]) -> int:
         if self._bootstrapped:
@@ -80,6 +81,7 @@ class HealingLoop:
         self._gold.extend(features)
         x, _ = self._matrix(features)
         drift = self.drift.score(x)
+        self._last_drift = drift
         self.metrics.gauge("sentinel_drift_psi", drift.aggregate_psi)
         events.append(self._event("drift_scored", "PSI scored for validated batch", drift.aggregate_psi))
 
@@ -142,6 +144,7 @@ class HealingLoop:
             "versions": versions,
             "gold_rows": len(self._gold),
             "metrics": self.metrics.snapshot(),
+            "last_drift": self._last_drift.to_dict() if self._last_drift is not None else None,
         }
 
     def _retrain(self, recent: list[FeatureRow]) -> PipelineEvent:
