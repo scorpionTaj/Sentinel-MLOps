@@ -5,4 +5,5 @@ __pycache__/
 .ruff_cache/
 data/runtime/*
 !data/runtime/.gitkeep
+*.egg-info/
 
