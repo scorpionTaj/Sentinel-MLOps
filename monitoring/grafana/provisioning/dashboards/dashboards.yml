@@ -1,0 +1,9 @@
+apiVersion: 1
+
+providers:
+  - name: Sentinel
+    folder: Sentinel MLOps
+    type: file
+    options:
+      path: /etc/grafana/provisioning/dashboards
+

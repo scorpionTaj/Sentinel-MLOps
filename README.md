@@ -1,0 +1,86 @@
+# Sentinel MLOps
+
+Sentinel is a runnable self-healing MLOps reference system: it detects a C-MAPSS-style distribution
+shift, retrains a RUL model, validates it against production, releases it as a weighted canary, and
+automatically promotes or rolls it back from live shadow evidence.
+
+The core proof runs locally in under a second with NumPy. The serving and observability profile adds
+FastAPI, Prometheus, and Grafana through Docker Compose.
+
+## Prove the loop
+
+```bash
+make test
+make demo       # drift → retrain → canary → promote
+make rollback   # drift → retrain → canary → injected regression → rollback
+make matrix     # detect FD002, FD003, and FD004 regimes
+```
+
+No downloaded dataset or running infrastructure is needed for these commands. Each demo prints the
+batch events, registry aliases, model history, PSI score, and Prometheus metrics as JSON.
+
+## Run the observable API
+
+```bash
+docker compose up --build
+curl -X POST http://localhost:8000/simulate-drift
+curl -X POST http://localhost:8000/simulate-drift
+```
+
+Open [http://localhost:8000](http://localhost:8000)—do not open `index.html` directly—for the
+minimal control-room web app. It exposes
+the same real drift, canary, promotion, and rollback endpoints used by the command-line demos. The
+demo controls and their reset endpoint are intentionally bound to localhost by Compose.
+
+If a default port is occupied, override it—for example,
+`GRAFANA_PORT=3300 docker compose up --build`.
+
+The first request crosses the PSI threshold and starts a canary. The second accumulates enough
+evidence to promote it. To demonstrate rollback, reset the volume, start a canary, then inject a
+candidate-only serving regression:
+
+```bash
+docker compose down -v
+docker compose up --build -d
+curl -X POST http://localhost:8000/simulate-drift
+curl -X POST http://localhost:8000/simulate-regression
+```
+
+- API and OpenAPI: [http://localhost:8000/docs](http://localhost:8000/docs)
+- Prometheus: [http://localhost:9090](http://localhost:9090)
+- Grafana dashboard: [http://localhost:3000](http://localhost:3000)
+
+## Interfaces
+
+`HealingLoop` is the primary interface. `bootstrap(rows)` establishes the production model and PSI
+reference; `process(rows)` owns all quality, detection, training, release, and evidence transitions;
+`predict(features, request_id)` routes live traffic deterministically.
+
+The current executable profile uses a rolling feature pipeline, strict data gate, custom PSI,
+regularized linear RUL model, atomic file registry, deterministic weighted router, and dependency-free
+Prometheus exporter. [Architecture decisions](docs/DECISIONS.md) describe the Kafka/Spark/Delta,
+Dagster, and MLflow replacement seams.
+
+## Real NASA C-MAPSS data
+
+Place any 26-column `train_FD001.txt` through `train_FD004.txt` file under `data/reference/`, then load it
+with `sentinel.datasets.load_cmapps_training`. The project does not silently download or redistribute
+the dataset. NASA currently publishes the dataset metadata and download resource through its
+[Open Data portal](https://data.nasa.gov/dataset/cmapss-jet-engine-simulated-data); availability can
+change, so the offline generator remains the reproducible default.
+
+See [the exact problem and drift strategy](docs/PROBLEM.md) and the
+[reproducible local evaluation](docs/EVALUATION.md). The interactive architecture artifact is
+generated from `architecture.json` and delivered as `architecture.html`.
+
+## Demo evidence to record
+
+1. Keep Grafana visible on the PSI, model version, and promotion/rollback panels.
+2. Call `/simulate-drift`; show the canary alias in `/status`.
+3. Call either `/simulate-drift` again (promotion) or `/simulate-regression` (rollback).
+4. End on `/status` and the model-event history.
+
+Target CV bullet after recording measured runs:
+
+> Built a self-healing MLOps pipeline that detects feature drift with PSI, retrains and validates RUL
+> models, canary-routes releases, and automatically promotes or rolls back from live shadow metrics.

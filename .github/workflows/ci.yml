@@ -1,0 +1,25 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+          cache: pip
+      - run: pip install ".[dev]"
+      - run: ruff check src tests
+      - run: pytest
+      - run: node tests/test_web_file_mode.mjs
+      - run: python -m sentinel demo --scenario promote
+      - run: python -m sentinel demo --scenario rollback
+      - run: python -m sentinel matrix

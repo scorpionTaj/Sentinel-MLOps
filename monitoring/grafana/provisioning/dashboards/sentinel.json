@@ -1,0 +1,34 @@
+{
+  "annotations": {"list": []},
+  "editable": true,
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Production model version",
+      "targets": [{"expr": "sentinel_model_version", "refId": "A"}],
+      "gridPos": {"h": 8, "w": 8, "x": 0, "y": 0}
+    },
+    {
+      "type": "timeseries",
+      "title": "PSI drift score",
+      "targets": [{"expr": "sentinel_drift_psi", "refId": "A"}],
+      "gridPos": {"h": 8, "w": 8, "x": 8, "y": 0}
+    },
+    {
+      "type": "stat",
+      "title": "Promotions / rollbacks",
+      "targets": [
+        {"expr": "sentinel_promotions_total", "legendFormat": "promotions", "refId": "A"},
+        {"expr": "sentinel_rollbacks_total", "legendFormat": "rollbacks", "refId": "B"}
+      ],
+      "gridPos": {"h": 8, "w": 8, "x": 16, "y": 0}
+    }
+  ],
+  "schemaVersion": 41,
+  "tags": ["mlops", "drift", "canary"],
+  "templating": {"list": []},
+  "time": {"from": "now-15m", "to": "now"},
+  "title": "Sentinel Self-Healing Loop",
+  "uid": "sentinel-mlops"
+}
+

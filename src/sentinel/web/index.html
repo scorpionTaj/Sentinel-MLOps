@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Operate and verify the Sentinel self-healing MLOps loop." />
+    <title>Sentinel Control Room</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script src="app.js" defer></script>
+  </head>
+  <body>
+    <div class="shell">
+      <header class="topbar">
+        <a class="brand" href="/" aria-label="Sentinel home">
+          <span class="brand-mark" aria-hidden="true"></span>
+          <span><strong>SENTINEL</strong><small>SELF-HEALING MLOPS</small></span>
+        </a>
+        <div class="connection" id="connection"><span></span> Connecting</div>
+      </header>
+
+      <main>
+        <section class="hero" aria-labelledby="page-title">
+          <div>
+            <p class="eyebrow">PIPELINE CONTROL ROOM / LIVE</p>
+            <h1 id="page-title">Watch the model<br /><em>heal itself.</em></h1>
+            <p class="lede">Inject a distribution shift, observe PSI breach the safety line, then let live evidence promote—or reject—the canary.</p>
+          </div>
+          <div class="actions" aria-label="Demo controls">
+            <label class="dataset-control" for="dataset">
+              <span>TEST DATASET</span>
+              <select id="dataset">
+                <option value="FD002">FD002 · multi-condition</option>
+                <option value="FD003">FD003 · dual-fault</option>
+                <option value="FD004">FD004 · multi-condition + dual-fault</option>
+              </select>
+            </label>
+            <button class="primary" id="drift-action"><span>01</span> Inject FD002 drift</button>
+            <button id="regression-action"><span>02</span> Corrupt active canary</button>
+            <button class="quiet" id="reset-action"><span>↻</span> Reset demo</button>
+          </div>
+        </section>
+
+        <section class="signal-grid" aria-label="Current pipeline signals">
+          <article class="signal accent">
+            <p>Production model</p>
+            <strong id="production-version">—</strong>
+            <small id="production-state">Loading registry</small>
+          </article>
+          <article class="signal">
+            <p>Canary model</p>
+            <strong id="canary-version">—</strong>
+            <small id="canary-state">No candidate deployed</small>
+          </article>
+          <article class="signal">
+            <p>Drift / PSI</p>
+            <strong id="drift-score">0.000</strong>
+            <div class="meter" aria-hidden="true"><span id="drift-meter"></span><i></i></div>
+            <small>Safety threshold 0.250</small>
+          </article>
+          <article class="signal">
+            <p>Validated Gold rows</p>
+            <strong id="gold-rows">—</strong>
+            <small>Quality-gated observations</small>
+          </article>
+        </section>
+
+        <section class="workspace">
+          <article class="panel timeline-panel">
+            <div class="panel-heading">
+              <div><p class="eyebrow">RELEASE EVIDENCE</p><h2>Model timeline</h2></div>
+              <span class="live-pill">LIVE</span>
+            </div>
+            <ol class="timeline" id="timeline" aria-live="polite"></ol>
+          </article>
+
+          <aside class="panel registry-panel">
+            <div class="panel-heading"><div><p class="eyebrow">REGISTRY</p><h2>Version ledger</h2></div></div>
+            <div id="versions" class="versions"></div>
+            <div class="proof">
+              <p>Safety proof</p>
+              <div><span>Retrains</span><strong id="retrain-count">0</strong></div>
+              <div><span>Promotions</span><strong id="promotion-count">0</strong></div>
+              <div><span>Rollbacks</span><strong id="rollback-count">0</strong></div>
+            </div>
+          </aside>
+        </section>
+      </main>
+
+      <footer><span>SENTINEL / LOCAL DEMO</span><span>FD001 REFERENCE → FD002 / FD003 / FD004 DRIFT</span></footer>
+    </div>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  </body>
+</html>

@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=75"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sentinel-mlops"
+version = "0.1.0"
+description = "A reproducible self-healing MLOps reference implementation"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = ["numpy>=2.0,<3"]
+
+[project.optional-dependencies]
+api = ["fastapi>=0.116,<1", "uvicorn[standard]>=0.35,<1"]
+dev = ["fastapi>=0.116,<1", "httpx>=0.28,<1", "pytest>=8.4,<9", "ruff>=0.12,<1"]
+
+[project.scripts]
+sentinel = "sentinel.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+sentinel = ["web/*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"

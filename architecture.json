@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Sentinel Self-Healing MLOps",
+    "quality_profile": "showcase",
+    "viewBox": [1390, 760],
+    "views": [
+      {
+        "id": "data-path",
+        "label": "Streaming data path",
+        "focus": ["sensor-replay", "event-bus", "feature-pipeline", "lakehouse", "quality-gate"],
+        "note": "Replay engine telemetry, compute features, and admit only validated training data."
+      },
+      {
+        "id": "healing-loop",
+        "label": "Self-healing loop",
+        "focus": ["drift-monitor", "orchestrator", "trainer-registry", "canary-router", "observability"],
+        "note": "A drift breach retrains, validates, canaries, then promotes or rolls back automatically."
+      },
+      {
+        "id": "prediction-path",
+        "label": "Prediction path",
+        "focus": ["api-client", "canary-router", "trainer-registry", "observability"],
+        "note": "FastAPI routes requests by release state while exposing operational evidence."
+      }
+    ]
+  },
+  "components": [
+    {"id": "sensor-replay", "type": "external", "label": "C-MAPSS Replay", "sublabel": "FD001 then FD002", "pos": [40, 180], "size": [150, 68]},
+    {"id": "event-bus", "type": "messagebus", "label": "Event Bus", "sublabel": "Kafka / Redpanda", "pos": [250, 180], "size": [150, 68]},
+    {"id": "feature-pipeline", "type": "backend", "label": "Feature Pipeline", "sublabel": "Spark / local adapter", "pos": [460, 180], "size": [160, 68]},
+    {"id": "lakehouse", "type": "database", "label": "Lakehouse", "sublabel": "Bronze · Silver · Gold", "pos": [690, 180], "size": [165, 68]},
+    {"id": "quality-gate", "type": "security", "label": "Quality Gate", "sublabel": "schema · ranges · nulls", "pos": [925, 180], "size": [165, 68]},
+    {"id": "drift-monitor", "type": "backend", "label": "Drift Monitor", "sublabel": "PSI threshold", "pos": [1160, 180], "size": [155, 68]},
+    {"id": "orchestrator", "type": "backend", "label": "Healing Orchestrator", "sublabel": "Dagster / local adapter", "pos": [1160, 390], "size": [175, 72]},
+    {"id": "trainer-registry", "type": "database", "label": "Trainer + Registry", "sublabel": "validate · version · alias", "pos": [890, 390], "size": [185, 72]},
+    {"id": "canary-router", "type": "backend", "label": "Canary Router", "sublabel": "FastAPI weighted release", "pos": [600, 390], "size": [180, 72]},
+    {"id": "api-client", "type": "external", "label": "Prediction Client", "sublabel": "POST /predict", "pos": [330, 390], "size": [160, 68]},
+    {"id": "observability", "type": "cloud", "label": "Observability", "sublabel": "Prometheus · Grafana", "pos": [760, 580], "size": [180, 68]}
+  ],
+  "connections": [
+    {"id": "replay-events", "from": "sensor-replay", "to": "event-bus", "label": "sensor readings", "variant": "emphasis", "labelDy": 58},
+    {"id": "consume-events", "from": "event-bus", "to": "feature-pipeline", "label": "consume"},
+    {"id": "write-medallion", "from": "feature-pipeline", "to": "lakehouse", "label": "rolling features", "labelDy": 58},
+    {"id": "validate-batches", "from": "lakehouse", "to": "quality-gate", "label": "Silver batch"},
+    {"id": "observe-gold", "from": "quality-gate", "to": "drift-monitor", "label": "validated Gold", "labelDy": 65},
+    {"id": "trigger-healing", "from": "drift-monitor", "to": "orchestrator", "label": "drift breach · PSI", "variant": "emphasis", "fromSide": "bottom", "toSide": "top"},
+    {"id": "run-retraining", "from": "orchestrator", "to": "trainer-registry", "label": "retrain + gate", "variant": "emphasis", "labelDy": -32},
+    {"id": "release-candidate", "from": "trainer-registry", "to": "canary-router", "label": "candidate version", "variant": "emphasis"},
+    {"id": "prediction-request", "from": "api-client", "to": "canary-router", "label": "prediction request"},
+    {"id": "live-evidence", "from": "canary-router", "to": "observability", "label": "latency + outcomes", "variant": "dashed", "fromSide": "bottom", "toSide": "top"},
+    {"id": "pipeline-evidence", "from": "orchestrator", "to": "observability", "label": "drift · promotion · rollback", "variant": "dashed"}
+  ],
+  "cards": [
+    {"dot": "cyan", "title": "Detection", "items": ["FD002 introduces an operating-condition shift", "PSI converts the shift into a reproducible trigger"]},
+    {"dot": "emerald", "title": "Recovery", "items": ["Offline validation protects the production baseline", "Canary evidence decides promotion or rollback"]},
+    {"dot": "violet", "title": "Demo evidence", "items": ["Every transition emits a metric and event", "The local profile proves the loop without a cluster"]}
+  ]
+}
