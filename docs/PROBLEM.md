@@ -12,3 +12,11 @@ The deliberate rollback scenario corrupts only the canary artifact after it pass
 validation. This represents packaging or serving skew, and proves that live shadow evidence—not
 only an offline metric—protects production.
 
+## Execution stack and architecture scope
+
+The reference implementation runs entirely in-process using NumPy for the core pipeline and
+FastAPI for serving, with an optional Docker Compose profile for Prometheus and Grafana.
+Distributed infrastructure tools (Kafka/Redpanda, Spark, Delta Lake, Dagster, and MLflow) are
+not active runtime services in this repository; they are documented architectural extension seams
+described in [`docs/DECISIONS.md`](DECISIONS.md).
+

@@ -32,8 +32,80 @@ body::before {
   background-size: 44px 44px;
 }
 
+.preview-banner {
+  background: #141712;
+  border-bottom: 1px solid #3c4923;
+  padding: 10px 0;
+  color: #dbe3d4;
+  font: 500 12px/1.4 Inter, sans-serif;
+}
+.preview-banner.hidden { display: none; }
+.preview-banner-inner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.preview-badge {
+  display: inline-block;
+  background: var(--acid);
+  color: #0b0d0c;
+  font: 750 9px/1 ui-monospace, monospace;
+  letter-spacing: .08em;
+  padding: 4px 6px;
+  border-radius: 2px;
+  text-transform: uppercase;
+}
+.preview-text {
+  flex: 1;
+  min-width: 260px;
+  color: #c9ccc5;
+}
+.preview-text code {
+  background: #23281f;
+  color: var(--acid);
+  padding: 2px 5px;
+  border-radius: 2px;
+  font-family: ui-monospace, monospace;
+  font-size: 11px;
+}
+.preview-link {
+  color: var(--acid);
+  text-decoration: none;
+  font: 600 11px/1 ui-monospace, monospace;
+  letter-spacing: .04em;
+  padding: 4px 8px;
+  border: 1px solid #465424;
+  border-radius: 2px;
+  transition: .15s ease;
+}
+.preview-link:hover {
+  background: var(--acid-soft);
+  border-color: var(--acid);
+}
+
 .shell { width: min(1360px, calc(100% - 40px)); margin: 0 auto; }
 .topbar { height: 82px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--line); }
+.topbar-right { display: flex; align-items: center; gap: 16px; }
+.github-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border: 1px solid var(--line);
+  background: #141714;
+  color: #c9ccc5;
+  text-decoration: none;
+  font: 600 11px/1 ui-monospace, monospace;
+  letter-spacing: .04em;
+  transition: .18s ease;
+}
+.github-link:hover {
+  border-color: var(--acid);
+  color: var(--ink);
+  transform: translateY(-1px);
+}
+.github-link svg { flex-shrink: 0; }
 .brand { display: flex; align-items: center; gap: 12px; color: inherit; text-decoration: none; letter-spacing: .08em; }
 .brand-mark { width: 30px; height: 30px; border: 1px solid var(--acid); position: relative; transform: rotate(45deg); }
 .brand-mark::after { content: ""; position: absolute; inset: 7px; background: var(--acid); }
@@ -44,6 +116,8 @@ body::before {
 .connection span { display: inline-block; width: 7px; height: 7px; margin-right: 8px; border-radius: 50%; background: #777; }
 .connection.online { color: var(--acid); }
 .connection.online span { background: var(--acid); box-shadow: 0 0 12px var(--acid); }
+.connection.preview { color: #e5b94f; }
+.connection.preview span { background: #e5b94f; box-shadow: 0 0 10px rgba(229, 185, 79, 0.4); }
 
 .hero { min-height: 350px; display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(280px, .7fr); align-items: end; gap: 60px; padding: 64px 0 52px; }
 .eyebrow { margin: 0 0 14px; color: var(--acid); font: 700 10px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; }

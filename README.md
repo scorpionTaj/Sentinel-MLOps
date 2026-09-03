@@ -1,11 +1,8 @@
 # Sentinel MLOps
 
-Sentinel is a runnable self-healing MLOps reference system: it detects a C-MAPSS-style distribution
-shift, retrains a RUL model, validates it against production, releases it as a weighted canary, and
-automatically promotes or rolls it back from live shadow evidence.
+> Sentinel is a self-healing MLOps reference pipeline: PSI-based drift detection triggers automated retraining, offline validation, canary release, and evidence-driven promotion/rollback — deterministic end-to-end demo, FastAPI/Prometheus/Grafana observability profile, with a documented scale-out path (Kafka/Spark/Delta/Dagster/MLflow).
 
-The core proof runs locally in under a second with NumPy. The serving and observability profile adds
-FastAPI, Prometheus, and Grafana through Docker Compose.
+The real running stack executes locally in under a second with a pure **NumPy core loop**, **FastAPI serving**, and an optional **Prometheus + Grafana** Docker Compose observability profile. Distributed infrastructure tools (Kafka/Redpanda, Spark, Delta Lake, Dagster, MLflow) are explicitly documented scale-out seams in [`docs/DECISIONS.md`](docs/DECISIONS.md), not running background services.
 
 ## Prove the loop
 
@@ -58,8 +55,11 @@ reference; `process(rows)` owns all quality, detection, training, release, and e
 
 The current executable profile uses a rolling feature pipeline, strict data gate, custom PSI,
 regularized linear RUL model, atomic file registry, deterministic weighted router, and dependency-free
-Prometheus exporter. [Architecture decisions](docs/DECISIONS.md) describe the Kafka/Spark/Delta,
-Dagster, and MLflow replacement seams.
+Prometheus exporter.
+
+**Running stack vs. planned scale-out path**:
+- **What is running today**: In-process NumPy core loop, FastAPI HTTP service, file-backed model registry, and containerized Prometheus + Grafana observability.
+- **Documented scale-out seams**: [Architecture decisions](docs/DECISIONS.md) detail the exact integration seams to swap in Kafka/Redpanda for event streaming, Spark + Delta Lake for medallion lakehouse storage, Dagster for asset orchestration, and MLflow for remote model registry management.
 
 ## Real NASA C-MAPSS data
 
@@ -82,5 +82,4 @@ generated from `architecture.json` and delivered as `architecture.html`.
 
 Target CV bullet after recording measured runs:
 
-> Built a self-healing MLOps pipeline that detects feature drift with PSI, retrains and validates RUL
-> models, canary-routes releases, and automatically promotes or rolls back from live shadow metrics.
+> Built a self-healing MLOps reference pipeline that detects feature drift with PSI, retrains and validates RUL models, canary-routes releases, and automatically promotes or rolls back from live shadow metrics (NumPy core loop, FastAPI serving, Prometheus/Grafana monitoring, with documented Kafka/Spark/Delta/Dagster/MLflow scale-out seams).

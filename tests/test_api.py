@@ -26,7 +26,10 @@ class ApiIntegrationTests(unittest.TestCase):
     def test_dashboard_and_every_declared_asset_load(self) -> None:
         response = self.client.get("/")
         self.assertEqual(response.status_code, 200)
-        paths = re.findall(r'(?:src|href)="([^"]+)"', response.text)
+        paths = [
+            p for p in re.findall(r'(?:src|href)="([^"]+)"', response.text)
+            if not p.startswith(("http://", "https://", "#"))
+        ]
         self.assertTrue(paths)
         for path in paths:
             with self.subTest(path=path):
