@@ -21,7 +21,7 @@ $$\text{PSI} = \sum_{b=1}^{B} (P_b - Q_b) \times \ln\left(\frac{P_b}{Q_b}\right)
 
 ## Scenario Catalogue
 
-Sentinel ships with a deterministic generator modeling the NASA C-MAPSS dataset families and sensor stress scenarios:
+Sentinel ships with a deterministic generator modeling the NASA C-MAPSS dataset families and sensor stress scenarios. It also provides loaders (`sentinel.datasets.load_cmapps_training` and `load_cmapps_test`) for official 26-column NASA telemetry files placed under `data/reference/`:
 
 | Scenario ID | Regime / Stress Type | Operating Conditions | Fault Modes | Drift Mechanism |
 | :--- | :--- | :--- | :--- | :--- |
@@ -50,4 +50,4 @@ A model that passes offline validation may still fail in production due to servi
 
 The reference implementation runs entirely in-process using pure **NumPy** for the core loop and **FastAPI** for HTTP serving, with an optional Docker Compose profile for **Prometheus** and **Grafana**.
 
-Distributed infrastructure tools (Kafka/Redpanda, Spark, Delta Lake, Dagster, and MLflow) are not active runtime dependencies in this repository; they are documented architectural extension seams described in [`docs/DECISIONS.md`](DECISIONS.md).
+Distributed infrastructure tools (Kafka/Redpanda, Spark, Delta Lake, Dagster, and MLflow) are not active runtime dependencies in this repository; they are documented architectural extension seams described in [`DECISIONS.md`](DECISIONS.md).

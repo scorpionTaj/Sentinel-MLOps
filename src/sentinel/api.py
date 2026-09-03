@@ -101,6 +101,24 @@ def create_app(state_dir: Path | None = None) -> FastAPI:
             return FileResponse(script_file)
         raise HTTPException(status_code=404, detail="app.js not found")
 
+    @app.get("/logo.svg", include_in_schema=False)
+    def dashboard_logo() -> Response:
+        logo_file = web_dir / "logo.svg"
+        if logo_file.exists():
+            return FileResponse(logo_file, media_type="image/svg+xml")
+        raise HTTPException(status_code=404, detail="logo.svg not found")
+
+    @app.get("/favicon.svg", include_in_schema=False)
+    @app.get("/favicon.ico", include_in_schema=False)
+    def dashboard_favicon() -> Response:
+        favicon_file = web_dir / "favicon.svg"
+        if favicon_file.exists():
+            return FileResponse(favicon_file, media_type="image/svg+xml")
+        logo_file = web_dir / "logo.svg"
+        if logo_file.exists():
+            return FileResponse(logo_file, media_type="image/svg+xml")
+        raise HTTPException(status_code=404, detail="favicon not found")
+
     @app.get("/health")
     def health() -> dict[str, str]:
         return {"status": "ok"}

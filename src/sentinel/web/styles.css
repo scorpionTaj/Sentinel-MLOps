@@ -107,8 +107,18 @@ body::before {
 }
 .github-link svg { flex-shrink: 0; }
 .brand { display: flex; align-items: center; gap: 12px; color: inherit; text-decoration: none; letter-spacing: .08em; }
-.brand-mark { width: 30px; height: 30px; border: 1px solid var(--acid); position: relative; transform: rotate(45deg); }
-.brand-mark::after { content: ""; position: absolute; inset: 7px; background: var(--acid); }
+.brand-logo {
+  width: 34px;
+  height: 34px;
+  display: block;
+  flex-shrink: 0;
+  filter: drop-shadow(0 0 6px rgba(199, 255, 74, 0.25));
+  transition: transform .2s ease, filter .2s ease;
+}
+.brand:hover .brand-logo {
+  transform: scale(1.08) rotate(6deg);
+  filter: drop-shadow(0 0 12px rgba(199, 255, 74, 0.55));
+}
 .brand strong, .brand small { display: block; }
 .brand strong { font-size: 14px; }
 .brand small { margin-top: 3px; color: var(--muted); font-size: 8px; letter-spacing: .18em; }

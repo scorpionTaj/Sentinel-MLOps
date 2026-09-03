@@ -23,11 +23,12 @@ The system defines stable adapter seams rather than wrapping heavyweight framewo
 
 ### Seam A: Remote Model Registry (MLflow / S3)
 - **Local Implementation**: [`FileModelRegistry`](../src/sentinel/registry.py) uses atomic JSON file writes (`os.replace`) to maintain versions, aliases (`production`, `canary`), metrics, and event audit history.
-- **Scale-Out Seam**: Replace `FileModelRegistry` with an `MLflowModelRegistry` adhering to the registry interface:
+- **Reference Adapter**: [`MLflowModelRegistry`](../src/sentinel/adapters/mlflow.py) implements [`ModelRegistryProtocol`](../src/sentinel/registry.py):
   ```python
   class ModelRegistryProtocol(Protocol):
       def register(self, model: RidgeModel, metrics: dict[str, float], state: str) -> int: ...
       def deploy_initial(self, version: int) -> None: ...
+      def start_canary(self, version: int) -> None: ...
       def promote(self) -> int: ...
       def rollback(self) -> int: ...
       def model(self, alias: str) -> RidgeModel: ...
@@ -36,11 +37,11 @@ The system defines stable adapter seams rather than wrapping heavyweight framewo
 
 ### Seam B: Telemetry Streaming & Medallion Storage (Kafka + Delta Lake)
 - **Local Implementation**: In-memory `TelemetryRow` sequence validated into structured feature matrices.
-- **Scale-Out Seam**: Ingest events from a Kafka/Redpanda topic (`turbofan.telemetry.raw`), stream into Bronze/Silver/Gold Delta Lake tables via Apache Spark, and admit validated Gold rows to the training set.
+- **Reference Adapter**: [`MedallionLakehouse`](../src/sentinel/adapters/streaming.py) models the raw Bronze stream (Kafka offsets/payloads), typed Silver conformed rows, and validated Gold matrices, paired with [`StreamingBatchConsumer`](../src/sentinel/adapters/streaming.py).
 
 ### Seam C: Orchestration & Automation (Dagster / Prefect)
 - **Local Implementation**: `HealingLoop.process(batch)` coordinates quality gating, drift detection, retraining, canary deployment, and rollback.
-- **Scale-Out Seam**: Invoke `HealingLoop.process` via a Dagster sensor monitoring Delta Lake table updates or drift events.
+- **Reference Adapter**: [`HealingSensor`](../src/sentinel/adapters/orchestrator.py) implements the sensor pattern to monitor streaming queues or Gold table partitions and trigger healing executions.
 
 ---
 
