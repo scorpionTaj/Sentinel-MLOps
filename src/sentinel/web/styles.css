@@ -126,8 +126,33 @@ h1 em { color: var(--acid); font-family: Georgia, serif; font-weight: 400; }
 .lede { max-width: 630px; margin: 28px 0 0; color: #b3b6b0; font-size: 16px; line-height: 1.65; }
 .actions { display: grid; gap: 10px; align-content: end; }
 .dataset-control { display: grid; gap: 8px; padding-bottom: 4px; color: var(--muted); font: 650 9px/1 ui-monospace, monospace; letter-spacing: .1em; }
-select { width: 100%; min-height: 44px; border: 1px solid #3b403b; border-radius: 0; background: #111311; color: var(--ink); padding: 0 14px; font: 600 11px/1 ui-monospace, monospace; }
+select {
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid #3b403b;
+  border-radius: 2px;
+  background-color: #111311;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='none'%3E%3Cpath d='M2.5 4.5L6 8L9.5 4.5' stroke='%2392948f' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  background-size: 12px;
+  color: var(--ink);
+  padding: 0 36px 0 14px;
+  font: 600 11px/1 ui-monospace, monospace;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  cursor: pointer;
+  transition: border-color .15s ease;
+}
+select:hover { border-color: #555d55; }
 select:focus-visible, button:focus-visible { outline: 2px solid var(--acid); outline-offset: 2px; }
+select option {
+  background: #151815;
+  color: var(--ink);
+  padding: 8px 12px;
+  font: 500 11px ui-monospace, monospace;
+}
 button { min-height: 54px; display: flex; align-items: center; gap: 14px; border: 1px solid #3b403b; background: #181b18; color: var(--ink); padding: 0 18px; cursor: pointer; font: 650 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; text-align: left; transition: .18s ease; }
 button span { color: var(--muted); font-size: 10px; }
 button:hover:not(:disabled) { transform: translateY(-2px); border-color: var(--acid); }
@@ -149,13 +174,19 @@ button:disabled { opacity: .35; cursor: not-allowed; }
 .meter i { position: absolute; left: 25%; top: -4px; width: 1px; height: 11px; background: var(--danger); }
 
 .workspace { display: grid; grid-template-columns: 1.65fr .75fr; gap: 16px; padding: 16px 0 44px; }
-.panel { border: 1px solid var(--line); background: rgba(18,20,18,.9); }
-.panel-heading { min-height: 84px; padding: 22px 24px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--line); }
+.panel { border: 1px solid var(--line); background: rgba(18,20,18,.9); display: flex; flex-direction: column; overflow: hidden; border-radius: 2px; }
+.timeline-panel { display: flex; flex-direction: column; height: 100%; }
+.panel-heading { min-height: 84px; padding: 22px 24px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--line); flex-shrink: 0; }
 .panel-heading .eyebrow { margin-bottom: 7px; }
 h2 { margin: 0; font-size: 20px; letter-spacing: -.025em; }
 .live-pill { border: 1px solid #465424; color: var(--acid); padding: 6px 9px; font: 700 9px/1 ui-monospace, monospace; }
-.timeline { min-height: 300px; max-height: 410px; overflow: auto; list-style: none; padding: 10px 24px 24px; margin: 0; }
-.timeline li { position: relative; display: grid; grid-template-columns: 58px 12px 1fr; gap: 12px; min-height: 62px; align-items: start; padding-top: 18px; color: #c9ccc5; font-size: 13px; }
+.timeline { flex: 1; min-height: 340px; max-height: 540px; overflow-y: auto; overflow-x: hidden; list-style: none; padding: 12px 24px 28px; margin: 0; scrollbar-width: thin; scrollbar-color: #343934 transparent; }
+.timeline::-webkit-scrollbar { width: 6px; }
+.timeline::-webkit-scrollbar-track { background: transparent; }
+.timeline::-webkit-scrollbar-thumb { background: #343934; border-radius: 3px; }
+.timeline::-webkit-scrollbar-thumb:hover { background: var(--acid); }
+.timeline li { position: relative; display: grid; grid-template-columns: 58px 12px 1fr; gap: 12px; min-height: 58px; align-items: start; padding-top: 16px; padding-bottom: 4px; color: #c9ccc5; font-size: 13px; }
+.timeline li:last-child { padding-bottom: 24px; }
 .timeline time { color: #747872; font: 10px/1.3 ui-monospace, monospace; }
 .timeline .dot { width: 8px; height: 8px; border: 1px solid var(--acid); background: var(--bg); transform: rotate(45deg); }
 .timeline li:not(:last-child)::after { content: ""; position: absolute; left: 75px; top: 31px; bottom: -18px; width: 1px; background: #343834; }

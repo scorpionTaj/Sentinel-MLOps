@@ -48,10 +48,12 @@
           <div class="actions" aria-label="Demo controls">
             <label class="dataset-control" for="dataset">
               <span>TEST DATASET</span>
-              <select id="dataset">
+              <select id="dataset" aria-label="Select test dataset for drift injection">
                 <option value="FD002">FD002 · multi-condition</option>
                 <option value="FD003">FD003 · dual-fault</option>
                 <option value="FD004">FD004 · multi-condition + dual-fault</option>
+                <option value="SENSOR_BIAS">SENSOR_BIAS · sensor bias</option>
+                <option value="SENSOR_DROPOUT">SENSOR_DROPOUT · sensor dropout</option>
               </select>
             </label>
             <button class="primary" id="drift-action"><span>01</span> Inject FD002 drift</button>

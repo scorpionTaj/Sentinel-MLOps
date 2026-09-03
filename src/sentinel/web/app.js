@@ -220,11 +220,15 @@ async function request(path, options = {}, timeoutMs = 2500) {
   }
 }
 
+let datasetsLoaded = false;
+
 async function refresh() {
   try {
     const status = await request("/status", {}, 2500);
     render(status, false);
-    loadDatasets();
+    if (!datasetsLoaded) {
+      loadDatasets();
+    }
   } catch {
     // If live API cannot be reached, fallback to pre-seeded preview snapshot
     render(PREVIEW_SNAPSHOT, true);
@@ -232,16 +236,25 @@ async function refresh() {
 }
 
 async function loadDatasets() {
+  if (datasetsLoaded) return;
   try {
     const data = await request("/datasets", {}, 2000);
-    if (data && Array.isArray(data.datasets)) {
-      const options = data.datasets
-        .filter((d) => d.injectable)
-        .map((d) => `<option value="${d.id}">${d.id} · ${d.name || d.id}</option>`)
-        .join("");
-      if (options && ui.dataset) {
+    if (data && Array.isArray(data.datasets) && ui.dataset) {
+      const currentVal = ui.dataset.value;
+      const existingVals = new Set(Array.from(ui.dataset.options).map((o) => o.value));
+      const injectables = data.datasets.filter((d) => d.injectable);
+      const isMissingAny = injectables.some((d) => !existingVals.has(d.id));
+
+      if (isMissingAny) {
+        const options = injectables
+          .map((d) => `<option value="${d.id}">${d.id} · ${d.name || d.id}</option>`)
+          .join("");
         ui.dataset.innerHTML = options;
+        if (currentVal && Array.from(ui.dataset.options).some((o) => o.value === currentVal)) {
+          ui.dataset.value = currentVal;
+        }
       }
+      datasetsLoaded = true;
     }
   } catch {
     // Keep default options if dataset discovery is unavailable
@@ -266,6 +279,15 @@ async function act(path, successMessage) {
 }
 
 if (ui.dataset) {
+  // Prevent mouse wheel from inadvertently flipping the select value while scrolling/hovering
+  ui.dataset.addEventListener(
+    "wheel",
+    (e) => {
+      e.preventDefault();
+    },
+    { passive: false },
+  );
+
   ui.dataset.addEventListener("change", () => {
     if (ui.driftAction && ui.driftAction.lastChild) {
       ui.driftAction.lastChild.textContent = ` Inject ${ui.dataset.value} drift`;
