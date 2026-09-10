@@ -31,6 +31,8 @@ Sentinel ships with a deterministic generator modeling the NASA C-MAPSS dataset 
 | **`FD004`** | Complex compound drift | 6 operational regimes | 2 (HPC + Fan degradation) | Compound operating & fault shift |
 | **`SENSOR_BIAS`** | Sensor hardware calibration drift | Single (Sea Level) | 1 (HPC degradation) | Constant sensor measurement offset (+3.5σ) |
 | **`SENSOR_DROPOUT`** | Hardware telemetry loss | Single (Sea Level) | 1 (HPC degradation) | Signal attenuation / zeroing on critical channels |
+| **`NOISE_BURST`** | Acquisition noise | Single (Sea Level) | 1 (HPC degradation) | High-variance measurements across every channel |
+| **`ADVERSARIAL`** | Relationship inversion | Multi-condition | Synthetic inversion | Health-to-sensor relationships reverse direction |
 
 ---
 

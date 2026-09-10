@@ -1,6 +1,6 @@
 # Reproducible Local Evaluation
 
-Measured on 2026-09-03 with CPython 3.14 and NumPy 2.5.2. These figures cover the deterministic offline simulator running in-process without cluster overhead or network latency.
+Updated on 2026-09-10 with CPython 3.14 and NumPy 2.5.x. These figures cover the deterministic offline simulator running in-process without cluster overhead or network latency.
 
 ---
 
@@ -15,10 +15,12 @@ Measured on 2026-09-03 with CPython 3.14 and NumPy 2.5.2. These figures cover th
 | **Maximum loop runtime** | 0.0502 s | Cold-start ceiling |
 | **Injected quality failures blocked** | 1/1 (100%) | NaN, null, and out-of-bounds rejection |
 | **FD002 drift PSI (threshold 0.20)** | 12.0885 | Operating-condition shift |
-| **FD003 drift PSI (threshold 0.20)** | 6.9623 | Dual-fault degradation shift |
-| **FD004 drift PSI (threshold 0.20)** | 9.9131 | Multi-condition + dual-fault shift |
-| **SENSOR_BIAS drift PSI (threshold 0.20)** | 7.5054 | Sensor calibration offset (+3.5σ) |
+| **FD003 drift PSI (threshold 0.20)** | 7.9528 | Dual-fault degradation shift |
+| **FD004 drift PSI (threshold 0.20)** | 8.7198 | Multi-condition + dual-fault shift |
+| **SENSOR_BIAS drift PSI (threshold 0.20)** | 8.5201 | Sensor calibration offset |
 | **SENSOR_DROPOUT drift PSI (threshold 0.20)** | 12.0885 | Severe channel attenuation |
+| **NOISE_BURST drift PSI (threshold 0.20)** | 3.2362 | High-variance acquisition window |
+| **ADVERSARIAL drift PSI (threshold 0.20)** | 12.0885 | Inverted degradation relationship |
 
 ---
 
@@ -56,8 +58,11 @@ Beyond deterministic synthetic slices, Sentinel is benchmarked on the official, 
 # 1. Run all unit, integration, and real-scale dataset tests
 make test
 
-# 2. Run the 5-scenario detector matrix
+# 2. Run the 7-scenario detector matrix
 make matrix
+
+# Optional: with the API stack running, exercise every catalog regime
+make api-smoke
 
 # 3. Trace automated promotion under FD002 drift
 make demo

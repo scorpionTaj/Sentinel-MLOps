@@ -54,4 +54,24 @@ class DatasetTests(unittest.TestCase):
         self.assertFalse(catalog[0].injectable)
         self.assertIn("FD004", drift_scenario_ids())
         self.assertIn("SENSOR_DROPOUT", drift_scenario_ids())
+        self.assertIn("NOISE_BURST", drift_scenario_ids())
+        self.assertIn("ADVERSARIAL", drift_scenario_ids())
         self.assertTrue(any(item.category == "stress_test" for item in catalog))
+
+    def test_test_split_loader_validates_terminal_rul_count(self) -> None:
+        row = [str(value) for value in range(1, 27)]
+        row[0], row[1] = "3", "1"
+        with tempfile.TemporaryDirectory() as temporary:
+            test_path = Path(temporary) / "test_FD001.txt"
+            rul_path = Path(temporary) / "RUL_FD001.txt"
+            test_path.write_text(" ".join(row) + "\n", encoding="utf-8")
+            rul_path.write_text("", encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "expected 1 terminal RUL"):
+                load_cmapps_test(test_path, rul_path, "FD001")
+
+    def test_official_loader_rejects_generated_stress_scenario(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            path = Path(temporary) / "train_SENSOR_BIAS.txt"
+            path.write_text(" ".join(str(value) for value in range(1, 27)), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "not a C-MAPSS domain"):
+                load_cmapps_training(path, "SENSOR_BIAS")

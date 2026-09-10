@@ -136,6 +136,7 @@ h1 em { color: var(--acid); font-family: Georgia, serif; font-weight: 400; }
 .lede { max-width: 630px; margin: 28px 0 0; color: #b3b6b0; font-size: 16px; line-height: 1.65; }
 .actions { display: grid; gap: 10px; align-content: end; }
 .dataset-control { display: grid; gap: 8px; padding-bottom: 4px; color: var(--muted); font: 650 9px/1 ui-monospace, monospace; letter-spacing: .1em; }
+.dataset-control small { min-height: 28px; color: #7f837d; font: 500 10px/1.35 ui-sans-serif, system-ui, sans-serif; letter-spacing: 0; }
 select {
   width: 100%;
   min-height: 44px;
@@ -165,6 +166,7 @@ select option {
 }
 button { min-height: 54px; display: flex; align-items: center; gap: 14px; border: 1px solid #3b403b; background: #181b18; color: var(--ink); padding: 0 18px; cursor: pointer; font: 650 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; text-align: left; transition: .18s ease; }
 button span { color: var(--muted); font-size: 10px; }
+button .action-label { color: inherit; font-size: inherit; }
 button:hover:not(:disabled) { transform: translateY(-2px); border-color: var(--acid); }
 button.primary { background: var(--acid); color: #0b0d0c; border-color: var(--acid); }
 button.primary span { color: #445516; }

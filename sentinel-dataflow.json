@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "diagram_type": "dataflow",
+  "meta": {
+    "title": "Sentinel Self-Healing MLOps — End-to-End Data Flow",
+    "output": "sentinel-dataflow.html",
+    "viewBox": [1080, 900],
+    "quality_profile": "showcase"
+  },
+  "stages": [
+    { "label": "Control + telemetry" },
+    { "label": "Ingress" },
+    { "label": "Quality + detection" },
+    { "label": "Learning gates" },
+    { "label": "Release + evidence" }
+  ],
+  "nodes": [
+    { "id": "controlRoom", "type": "frontend", "label": "Control Room", "sublabel": "dashboard + CLI", "stage": 0, "row": 0, "tag": "operator" },
+    { "id": "telemetry", "type": "external", "label": "Telemetry Sources", "sublabel": "FD001–FD004 + stress", "stage": 0, "row": 3, "tag": "official or generated" },
+    { "id": "fastApi", "type": "backend", "label": "FastAPI Service", "sublabel": "control endpoints", "stage": 1, "row": 0, "tag": "localhost:8000" },
+    { "id": "adapters", "type": "messagebus", "label": "Ingestion Adapters", "sublabel": "loader or stream", "stage": 1, "row": 3, "tag": "Kafka / Delta seam" },
+    { "id": "qualityGate", "type": "security", "label": "Quality Gate", "sublabel": "shape · finite · ranges", "stage": 2, "row": 0, "tag": "fail closed" },
+    { "id": "psiDetector", "type": "backend", "label": "PSI Detector", "sublabel": "feature + aggregate", "stage": 2, "row": 3, "tag": "threshold 0.20–0.25" },
+    { "id": "ridgeTrainer", "type": "backend", "label": "Ridge Retrainer", "sublabel": "recent Gold split", "stage": 3, "row": 0, "tag": "deterministic NumPy" },
+    { "id": "offlineGate", "type": "security", "label": "Offline MAE Gate", "sublabel": "candidate vs production", "stage": 3, "row": 2, "tag": "+5% tolerance" },
+    { "id": "metrics", "type": "backend", "label": "Metrics Exporter", "sublabel": "gauges + counters", "stage": 3, "row": 4, "tag": "Prometheus text" },
+    { "id": "releaseControl", "type": "database", "label": "Release Control", "sublabel": "registry + shadow canary", "stage": 4, "row": 1, "tag": "promote / rollback" },
+    { "id": "observability", "type": "cloud", "label": "Observability", "sublabel": "Prometheus + Grafana", "stage": 4, "row": 4, "tag": "2 s scrape" }
+  ],
+  "flows": [
+    { "from": "controlRoom", "to": "fastApi", "label": "HTTP / JSON", "classification": "actions + status", "variant": "emphasis", "labelDy": 38 },
+    { "from": "telemetry", "to": "adapters", "label": "raw rows", "classification": "26 columns or generated", "variant": "emphasis", "labelAt": [208, 542] },
+    { "from": "fastApi", "to": "qualityGate", "label": "batch", "classification": "POST /simulate-drift", "variant": "emphasis", "route": "straight", "labelAt": [423, 95] },
+    { "from": "adapters", "to": "qualityGate", "label": "TelemetryRow batch", "classification": "Bronze → Silver", "variant": "dashed" },
+    { "from": "qualityGate", "to": "psiDetector", "label": "Gold rows", "classification": "9 features", "variant": "emphasis", "route": "straight", "labelAt": [530, 200] },
+    { "from": "psiDetector", "to": "ridgeTrainer", "label": "PSI ≥ threshold", "classification": "drift breach", "variant": "emphasis" },
+    { "from": "ridgeTrainer", "to": "offlineGate", "label": "MAE", "classification": "70/30 recent split", "variant": "emphasis", "route": "straight", "labelAt": [745, 200] },
+    { "from": "offlineGate", "to": "releaseControl", "label": "canary or reject", "classification": "atomic state change", "variant": "security" },
+    { "from": "psiDetector", "to": "metrics", "label": "PSI evidence", "classification": "gauge", "labelDx": 76 },
+    { "from": "metrics", "to": "observability", "label": "scrape /metrics", "classification": "Prometheus", "variant": "default", "labelDy": 38 },
+    { "from": "releaseControl", "to": "observability", "label": "release proof", "classification": "versions + decisions", "variant": "default", "route": "straight", "labelAt": [960, 314] }
+  ],
+  "cards": [
+    { "dot": "emerald", "title": "Executable Local Core", "items": ["FD001 establishes the PSI reference and production v1", "Seven injectable regimes share one discoverable scenario catalog", "NumPy keeps retraining and evidence checks deterministic"] },
+    { "dot": "rose", "title": "Four Safety Boundaries", "items": ["Malformed rows stop before drift or training", "PSI gates unnecessary retraining", "Offline MAE rejects weak candidates", "Live shadow MAE atomically promotes or rolls back"] },
+    { "dot": "violet", "title": "Production Evolution", "items": ["Streaming adapter models Bronze, Silver, and Gold lineage", "HealingSensor exposes the Dagster/Airflow trigger seam", "MLflow adapter preserves the registry protocol and aliases"] }
+  ]
+}

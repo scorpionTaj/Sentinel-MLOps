@@ -3,12 +3,13 @@ from __future__ import annotations
 from dataclasses import asdict, dataclass
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, slots=True)
 class Scenario:
     id: str
     name: str
     category: str
     injectable: bool
+    seed: int
     description: str = ""
 
     def to_dict(self) -> dict[str, object]:
@@ -21,6 +22,7 @@ SCENARIOS: tuple[Scenario, ...] = (
         name="FD001 baseline",
         category="cmapps",
         injectable=False,
+        seed=10,
         description="Sea-level single condition baseline dataset.",
     ),
     Scenario(
@@ -28,6 +30,7 @@ SCENARIOS: tuple[Scenario, ...] = (
         name="FD002 multi-condition",
         category="cmapps",
         injectable=True,
+        seed=99,
         description="Six operational condition regimes introducing operating drift.",
     ),
     Scenario(
@@ -35,6 +38,7 @@ SCENARIOS: tuple[Scenario, ...] = (
         name="FD003 dual-fault",
         category="cmapps",
         injectable=True,
+        seed=199,
         description="HPC and fan degradation modes introducing fault drift.",
     ),
     Scenario(
@@ -42,6 +46,7 @@ SCENARIOS: tuple[Scenario, ...] = (
         name="FD004 multi-condition + dual-fault",
         category="cmapps",
         injectable=True,
+        seed=299,
         description="Combination of operational condition regimes and dual fault modes.",
     ),
     Scenario(
@@ -49,6 +54,7 @@ SCENARIOS: tuple[Scenario, ...] = (
         name="Sensor bias",
         category="stress_test",
         injectable=True,
+        seed=399,
         description="Systematic sensor measurement offset inducing distributional drift.",
     ),
     Scenario(
@@ -56,7 +62,24 @@ SCENARIOS: tuple[Scenario, ...] = (
         name="Sensor dropout",
         category="stress_test",
         injectable=True,
+        seed=499,
         description="Severe telemetry signal attenuation simulating degraded sensing hardware.",
+    ),
+    Scenario(
+        id="NOISE_BURST",
+        name="Noise burst",
+        category="stress_test",
+        injectable=True,
+        seed=599,
+        description="High-variance measurements simulating a noisy acquisition window.",
+    ),
+    Scenario(
+        id="ADVERSARIAL",
+        name="Adversarial inversion",
+        category="stress_test",
+        injectable=True,
+        seed=699,
+        description="Inverted health relationships exercise offline and live safety gates.",
     ),
 )
 
@@ -67,3 +90,15 @@ def all_scenarios() -> tuple[Scenario, ...]:
 
 def drift_scenario_ids() -> tuple[str, ...]:
     return tuple(scenario.id for scenario in SCENARIOS if scenario.injectable)
+
+
+def drift_scenarios() -> tuple[Scenario, ...]:
+    return tuple(scenario for scenario in SCENARIOS if scenario.injectable)
+
+
+def get_scenario(scenario_id: str) -> Scenario:
+    for scenario in SCENARIOS:
+        if scenario.id == scenario_id:
+            return scenario
+    supported = ", ".join(scenario.id for scenario in SCENARIOS)
+    raise ValueError(f"domain must be one of {supported}")

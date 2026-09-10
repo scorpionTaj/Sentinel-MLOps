@@ -48,16 +48,19 @@
           </div>
           <div class="actions" aria-label="Demo controls">
             <label class="dataset-control" for="dataset">
-              <span>TEST DATASET</span>
+              <span>DATASET / STRESS SCENARIO</span>
               <select id="dataset" aria-label="Select test dataset for drift injection">
                 <option value="FD002">FD002 · multi-condition</option>
                 <option value="FD003">FD003 · dual-fault</option>
                 <option value="FD004">FD004 · multi-condition + dual-fault</option>
                 <option value="SENSOR_BIAS">SENSOR_BIAS · sensor bias</option>
                 <option value="SENSOR_DROPOUT">SENSOR_DROPOUT · sensor dropout</option>
+                <option value="NOISE_BURST">NOISE_BURST · noisy acquisition window</option>
+                <option value="ADVERSARIAL">ADVERSARIAL · inverted degradation</option>
               </select>
+              <small id="dataset-description">Multiple operating conditions with one degradation mode.</small>
             </label>
-            <button class="primary" id="drift-action"><span>01</span> Inject FD002 drift</button>
+            <button class="primary" id="drift-action"><span>01</span><span class="action-label" id="drift-action-label">Inject FD002 drift</span></button>
             <button id="regression-action"><span>02</span> Corrupt active canary</button>
             <button class="quiet" id="reset-action"><span>↻</span> Reset demo</button>
           </div>
@@ -78,7 +81,7 @@
             <p>Drift / PSI</p>
             <strong id="drift-score">0.000</strong>
             <div class="meter" aria-hidden="true"><span id="drift-meter"></span><i></i></div>
-            <small>Safety threshold 0.250</small>
+            <small id="drift-detail">Safety threshold 0.250</small>
           </article>
           <article class="signal">
             <p>Validated Gold rows</p>

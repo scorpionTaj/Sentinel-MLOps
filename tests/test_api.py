@@ -52,7 +52,18 @@ class ApiIntegrationTests(unittest.TestCase):
         payload = response.json()
         ids = {item["id"] for item in payload["datasets"]}
         self.assertEqual(payload["baseline"], "FD001")
-        self.assertTrue({"FD002", "FD003", "FD004", "SENSOR_BIAS", "SENSOR_DROPOUT"} <= ids)
+        self.assertTrue(
+            {
+                "FD002",
+                "FD003",
+                "FD004",
+                "SENSOR_BIAS",
+                "SENSOR_DROPOUT",
+                "NOISE_BURST",
+                "ADVERSARIAL",
+            }
+            <= ids
+        )
 
     def test_every_injectable_dataset_can_run_through_the_api(self) -> None:
         datasets = self.client.get("/datasets").json()["datasets"]

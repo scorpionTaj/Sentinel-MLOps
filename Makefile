@@ -1,4 +1,4 @@
-.PHONY: test demo rollback matrix benchmark web-check api up down
+.PHONY: test demo rollback matrix benchmark web-check api-smoke api up down
 
 test:
 	PYTHONPATH=src python -m unittest discover -s tests -v
@@ -17,6 +17,9 @@ benchmark:
 
 web-check:
 	python scripts/check_web.py --base-url $${SENTINEL_URL:-http://127.0.0.1:8000}
+
+api-smoke:
+	python scripts/check_api_scenarios.py --base-url $${SENTINEL_URL:-http://127.0.0.1:8000}
 
 api:
 	uvicorn sentinel.api:app --app-dir src --reload

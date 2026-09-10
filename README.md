@@ -10,7 +10,7 @@ The real running stack executes locally in under a second with a pure **NumPy co
 make test
 make demo       # drift → retrain → canary → promote
 make rollback   # drift → retrain → canary → injected regression → rollback
-make matrix     # detect FD002, FD003, and FD004 regimes
+make matrix     # detect 7 C-MAPSS and synthetic stress regimes
 ```
 
 No downloaded dataset or running infrastructure is needed for these commands. Each demo prints the
@@ -28,6 +28,10 @@ Open [http://localhost:8000](http://localhost:8000)—do not open `index.html` d
 minimal control-room web app. It exposes
 the same real drift, canary, promotion, and rollback endpoints used by the command-line demos. The
 demo controls and their reset endpoint are intentionally bound to localhost by Compose.
+
+The dashboard discovers its choices from `GET /datasets`. It includes FD002–FD004 plus sensor-bias,
+sensor-dropout, noise-burst, and adversarial-inversion stress scenarios. After starting the stack,
+`make web-check` validates the page and assets and `make api-smoke` exercises every injectable regime.
 
 If a default port is occupied, override it—for example,
 `GRAFANA_PORT=3300 docker compose up --build`.
@@ -64,14 +68,17 @@ Prometheus exporter.
 ## Real NASA C-MAPSS data
 
 Place any 26-column `train_FD001.txt` through `train_FD004.txt` file under `data/reference/`, then load it
-with `sentinel.datasets.load_cmapps_training`. The project does not silently download or redistribute
+with `sentinel.datasets.load_cmapps_training`. Official test partitions and terminal targets are
+supported by `sentinel.datasets.load_cmapps_test(test_path, rul_path, domain)`. The project does not silently download or redistribute
 the dataset. NASA currently publishes the dataset metadata and download resource through its
 [Open Data portal](https://data.nasa.gov/dataset/cmapss-jet-engine-simulated-data); availability can
 change, so the offline generator remains the reproducible default.
 
 See [the exact problem and drift strategy](docs/PROBLEM.md) and the
 [reproducible local evaluation](docs/EVALUATION.md). The interactive architecture artifact is
-generated from `architecture.json` and delivered as `architecture.html`.
+generated from `architecture.json` and delivered as `architecture.html`. The detailed executable
+flow is captured separately in [`sentinel-dataflow.html`](sentinel-dataflow.html), generated from
+the validated [`sentinel-dataflow.json`](sentinel-dataflow.json) specification.
 
 ## Demo evidence to record
 

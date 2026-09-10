@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import numpy as np
 
+from sentinel.scenarios import get_scenario
 from sentinel.types import TelemetryRow
 
 
@@ -14,17 +15,7 @@ def generate_telemetry(
 ) -> list[TelemetryRow]:
     """Generate C-MAPSS-shaped telemetry with controllable concept drift."""
 
-    supported = {
-        "FD001",
-        "FD002",
-        "FD003",
-        "FD004",
-        "SENSOR_BIAS",
-        "SENSOR_DROPOUT",
-        "ADVERSARIAL",
-    }
-    if domain not in supported:
-        raise ValueError(f"domain must be one of {', '.join(sorted(supported))}")
+    get_scenario(domain)
     rng = np.random.default_rng(seed)
     rows: list[TelemetryRow] = []
     for engine_index in range(engines):
@@ -91,7 +82,16 @@ def generate_telemetry(
                     0.3 + 0.5 * health + rng.normal(0, 0.02),
                     0.05 + rng.normal(0, 0.01),
                 )
-            else:
+            elif domain == "NOISE_BURST":
+                operating = float(rng.normal(0.0, 0.25))
+                sensors = (
+                    health + rng.normal(0, 0.32),
+                    1.8 * health + rng.normal(0, 0.38),
+                    0.45 * health + rng.normal(0, 0.30),
+                    0.3 + 0.5 * health + rng.normal(0, 0.34),
+                    1.1 - health + rng.normal(0, 0.30),
+                )
+            else:  # ADVERSARIAL
                 operating = float(rng.normal(1.15, 0.08))
                 inverted = 1.0 - health
                 sensors = (

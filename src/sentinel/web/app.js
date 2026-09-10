@@ -103,6 +103,7 @@ const ui = {
   canaryState: document.querySelector("#canary-state"),
   drift: document.querySelector("#drift-score"),
   driftMeter: document.querySelector("#drift-meter"),
+  driftDetail: document.querySelector("#drift-detail"),
   gold: document.querySelector("#gold-rows"),
   timeline: document.querySelector("#timeline"),
   versions: document.querySelector("#versions"),
@@ -114,6 +115,8 @@ const ui = {
   resetAction: document.querySelector("#reset-action"),
   toast: document.querySelector("#toast"),
   dataset: document.querySelector("#dataset"),
+  datasetDescription: document.querySelector("#dataset-description"),
+  driftActionLabel: document.querySelector("#drift-action-label"),
   previewBanner: document.querySelector("#preview-banner"),
 };
 
@@ -190,6 +193,13 @@ function render(status, isPreview = false) {
   ui.canaryState.textContent = canary ? "Shadow evaluation active" : "No candidate deployed";
   ui.drift.textContent = formatMetric(psi);
   ui.driftMeter.style.width = `${Math.min(100, (psi / 1.0) * 100)}%`;
+  if (ui.driftDetail) {
+    const features = status.last_drift?.feature_psi || {};
+    const topShift = Object.entries(features).sort((left, right) => right[1] - left[1])[0];
+    ui.driftDetail.textContent = topShift
+      ? `Top shift: ${topShift[0]} (${formatMetric(topShift[1])}) · threshold ${formatMetric(status.last_drift.threshold)}`
+      : "Safety threshold 0.250";
+  }
   ui.gold.textContent = Number(status.gold_rows ?? 0).toLocaleString();
   ui.regressionAction.disabled = !canary;
   ui.retrains.textContent = Math.trunc(counters.sentinel_retrains_total ?? 0);
@@ -221,6 +231,13 @@ async function request(path, options = {}, timeoutMs = 2500) {
 }
 
 let datasetsLoaded = false;
+let datasetCatalog = new Map();
+
+function updateDatasetContext() {
+  const selected = datasetCatalog.get(ui.dataset?.value);
+  if (ui.datasetDescription && selected) ui.datasetDescription.textContent = selected.description;
+  if (ui.driftActionLabel) ui.driftActionLabel.textContent = `Inject ${ui.dataset.value} drift`;
+}
 
 async function refresh() {
   try {
@@ -243,11 +260,12 @@ async function loadDatasets() {
       const currentVal = ui.dataset.value;
       const existingVals = new Set(Array.from(ui.dataset.options).map((o) => o.value));
       const injectables = data.datasets.filter((d) => d.injectable);
+      datasetCatalog = new Map(injectables.map((dataset) => [dataset.id, dataset]));
       const isMissingAny = injectables.some((d) => !existingVals.has(d.id));
 
       if (isMissingAny) {
         const options = injectables
-          .map((d) => `<option value="${d.id}">${d.id} · ${d.name || d.id}</option>`)
+          .map((d) => `<option value="${d.id}">${d.name || d.id}</option>`)
           .join("");
         ui.dataset.innerHTML = options;
         if (currentVal && Array.from(ui.dataset.options).some((o) => o.value === currentVal)) {
@@ -255,6 +273,7 @@ async function loadDatasets() {
         }
       }
       datasetsLoaded = true;
+      updateDatasetContext();
     }
   } catch {
     // Keep default options if dataset discovery is unavailable
@@ -289,9 +308,7 @@ if (ui.dataset) {
   );
 
   ui.dataset.addEventListener("change", () => {
-    if (ui.driftAction && ui.driftAction.lastChild) {
-      ui.driftAction.lastChild.textContent = ` Inject ${ui.dataset.value} drift`;
-    }
+    updateDatasetContext();
   });
 }
 if (ui.driftAction) {
