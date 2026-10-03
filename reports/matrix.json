@@ -1,0 +1,96 @@
+{
+  "FD001": {
+    "expected_detected": false,
+    "detected": false,
+    "psi": 0.13055430023300718,
+    "max_standardized_shift": 0.15414655493454169,
+    "event_kinds": [
+      "drift_scored"
+    ],
+    "canary_version": null
+  },
+  "FD002": {
+    "expected_detected": true,
+    "detected": true,
+    "psi": 4.511027211129482,
+    "max_standardized_shift": 29.898570540974553,
+    "event_kinds": [
+      "drift_scored",
+      "drift_detected",
+      "canary_started"
+    ],
+    "canary_version": 2
+  },
+  "FD003": {
+    "expected_detected": true,
+    "detected": true,
+    "psi": 3.519628771144218,
+    "max_standardized_shift": 3.1130288378009086,
+    "event_kinds": [
+      "drift_scored",
+      "drift_detected",
+      "canary_started"
+    ],
+    "canary_version": 2
+  },
+  "FD004": {
+    "expected_detected": true,
+    "detected": true,
+    "psi": 3.2627447644390397,
+    "max_standardized_shift": 4.449042919104956,
+    "event_kinds": [
+      "drift_scored",
+      "drift_detected",
+      "canary_started"
+    ],
+    "canary_version": 2
+  },
+  "SENSOR_BIAS": {
+    "expected_detected": true,
+    "detected": true,
+    "psi": 3.1116563863588205,
+    "max_standardized_shift": 2.1807333333859034,
+    "event_kinds": [
+      "drift_scored",
+      "drift_detected",
+      "canary_started"
+    ],
+    "canary_version": 2
+  },
+  "SENSOR_DROPOUT": {
+    "expected_detected": true,
+    "detected": true,
+    "psi": 4.511027211129482,
+    "max_standardized_shift": 1.9290148230139832,
+    "event_kinds": [
+      "drift_scored",
+      "drift_detected",
+      "canary_started"
+    ],
+    "canary_version": 2
+  },
+  "NOISE_BURST": {
+    "expected_detected": true,
+    "detected": true,
+    "psi": 1.9989168466149456,
+    "max_standardized_shift": 0.9066585560277757,
+    "event_kinds": [
+      "drift_scored",
+      "drift_detected",
+      "canary_started"
+    ],
+    "canary_version": 2
+  },
+  "ADVERSARIAL": {
+    "expected_detected": true,
+    "detected": true,
+    "psi": 4.511027211129482,
+    "max_standardized_shift": 30.148493574404352,
+    "event_kinds": [
+      "drift_scored",
+      "drift_detected",
+      "canary_started"
+    ],
+    "canary_version": 2
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "benchmark": "NASA_CMAPSS_LARGE_SCALE",
+  "records_evaluated": 74390,
+  "fd001_rows": 20631,
+  "fd002_rows": 53759,
+  "load_time_seconds": 0.5742,
+  "bootstrap_time_seconds": 0.3278,
+  "batch_inference_and_drift_time_seconds": 0.0705,
+  "canary_evaluation_time_seconds": 0.0562,
+  "initial_production_version": 1,
+  "drift_psi": 6.005,
+  "drift_detected": true,
+  "events": [
+    "drift_scored",
+    "drift_detected",
+    "canary_started",
+    "promoted",
+    "drift_scored"
+  ],
+  "final_production_version": 2,
+  "metrics": {
+    "gauges": {
+      "sentinel_training_mae": 16.97915369075286,
+      "sentinel_holdout_mae": 18.20584624243372,
+      "sentinel_model_version": 2.0,
+      "sentinel_drift_psi": 0.057512717524365486,
+      "sentinel_canary_version": 2.0
+    },
+    "counters": {
+      "sentinel_bootstrap_total": 1.0,
+      "sentinel_drift_breaches_total": 1.0,
+      "sentinel_retrains_total": 1.0,
+      "sentinel_promotions_total": 1.0
+    }
+  }
+}

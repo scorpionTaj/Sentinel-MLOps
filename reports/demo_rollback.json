@@ -1,0 +1,215 @@
+{
+  "scenario": "rollback",
+  "initial_version": 1,
+  "first_batch": {
+    "quality": {
+      "accepted": true,
+      "checked_rows": 70,
+      "failures": []
+    },
+    "drift": {
+      "detected": true,
+      "aggregate_psi": 4.09610193629274,
+      "feature_psi": {
+        "operating_condition": 4.09610193629274,
+        "sensor_1": 0.8860317033701232,
+        "sensor_2": 0.8420294839670459,
+        "sensor_3": 2.4721167381374816,
+        "sensor_4": 1.819446417069753,
+        "sensor_5": 2.6074122574386775,
+        "sensor_1_rolling_mean": 0.8659736315476105,
+        "sensor_3_rolling_mean": 2.6030887005522594
+      },
+      "threshold": 0.2,
+      "feature_shift": {
+        "operating_condition": 29.086630826020905,
+        "sensor_1": 0.566159281444108,
+        "sensor_2": 0.07841897934626241,
+        "sensor_3": 3.2594519719339434,
+        "sensor_4": 1.7089194853129483,
+        "sensor_5": 1.6422730090420357,
+        "sensor_1_rolling_mean": 0.5412087086010781,
+        "sensor_3_rolling_mean": 3.5276235610817235
+      },
+      "warning": false,
+      "noise_floor": 0.40874247308442074
+    },
+    "active_version": 1,
+    "canary_version": 2,
+    "events": [
+      {
+        "sequence": 1,
+        "kind": "drift_scored",
+        "detail": "PSI scored for validated batch",
+        "value": 4.09610193629274
+      },
+      {
+        "sequence": 2,
+        "kind": "drift_detected",
+        "detail": "threshold breached",
+        "value": 4.09610193629274
+      },
+      {
+        "sequence": 3,
+        "kind": "canary_started",
+        "detail": "version 2 passed offline gate",
+        "value": 3.4120461806966578
+      }
+    ]
+  },
+  "second_batch": {
+    "quality": {
+      "accepted": true,
+      "checked_rows": 70,
+      "failures": []
+    },
+    "drift": {
+      "detected": true,
+      "aggregate_psi": 4.09610193629274,
+      "feature_psi": {
+        "operating_condition": 4.09610193629274,
+        "sensor_1": 0.7895392209826627,
+        "sensor_2": 0.7737473232050182,
+        "sensor_3": 2.029699926150465,
+        "sensor_4": 1.8910700657541497,
+        "sensor_5": 2.795174365383611,
+        "sensor_1_rolling_mean": 0.775872667884677,
+        "sensor_3_rolling_mean": 2.1472695711080387
+      },
+      "threshold": 0.2,
+      "feature_shift": {
+        "operating_condition": 30.173274652021725,
+        "sensor_1": 0.44650343631878864,
+        "sensor_2": 0.03451323675291292,
+        "sensor_3": 2.844076907220859,
+        "sensor_4": 1.971049526496355,
+        "sensor_5": 1.7614686493662577,
+        "sensor_1_rolling_mean": 0.4282796847738453,
+        "sensor_3_rolling_mean": 3.1280393828362407
+      },
+      "warning": false,
+      "noise_floor": 0.40874247308442074
+    },
+    "active_version": 1,
+    "canary_version": null,
+    "events": [
+      {
+        "sequence": 4,
+        "kind": "drift_scored",
+        "detail": "PSI scored for validated batch",
+        "value": 4.09610193629274
+      },
+      {
+        "sequence": 5,
+        "kind": "rolled_back",
+        "detail": "rolled_back: canary MAE 26.746 vs production 8.087, paired diff CI [10.928, 26.391] margin 0.243, n=100",
+        "value": null
+      }
+    ]
+  },
+  "status": {
+    "bootstrapped": true,
+    "aliases": {
+      "production": 1
+    },
+    "events": [
+      {
+        "kind": "registered",
+        "version": 1
+      },
+      {
+        "kind": "initial_deploy",
+        "version": 1
+      },
+      {
+        "kind": "registered",
+        "version": 2
+      },
+      {
+        "kind": "canary_started",
+        "version": 2
+      },
+      {
+        "kind": "regression_injected",
+        "version": 2
+      },
+      {
+        "kind": "rolled_back",
+        "version": 2
+      }
+    ],
+    "versions": [
+      {
+        "version": 1,
+        "state": "production",
+        "metrics": {
+          "holdout_mae": 1.9822907471978275,
+          "training_mae": 1.3915435298322716
+        }
+      },
+      {
+        "version": 2,
+        "state": "rolled_back",
+        "metrics": {
+          "production_mae": 6.915367259682379,
+          "validation_mae": 3.4120461806966578
+        }
+      }
+    ],
+    "gold_rows": 500,
+    "metrics": {
+      "gauges": {
+        "sentinel_training_mae": 1.3915435298322716,
+        "sentinel_holdout_mae": 1.9822907471978275,
+        "sentinel_model_version": 1.0,
+        "sentinel_drift_psi": 4.09610193629274,
+        "sentinel_canary_version": 2.0
+      },
+      "counters": {
+        "sentinel_bootstrap_total": 1.0,
+        "sentinel_drift_breaches_total": 1.0,
+        "sentinel_retrains_total": 1.0,
+        "sentinel_fault_injections_total": 1.0,
+        "sentinel_rollbacks_total": 1.0
+      }
+    },
+    "last_drift": {
+      "detected": true,
+      "aggregate_psi": 4.09610193629274,
+      "feature_psi": {
+        "operating_condition": 4.09610193629274,
+        "sensor_1": 0.7895392209826627,
+        "sensor_2": 0.7737473232050182,
+        "sensor_3": 2.029699926150465,
+        "sensor_4": 1.8910700657541497,
+        "sensor_5": 2.795174365383611,
+        "sensor_1_rolling_mean": 0.775872667884677,
+        "sensor_3_rolling_mean": 2.1472695711080387
+      },
+      "threshold": 0.2,
+      "feature_shift": {
+        "operating_condition": 30.173274652021725,
+        "sensor_1": 0.44650343631878864,
+        "sensor_2": 0.03451323675291292,
+        "sensor_3": 2.844076907220859,
+        "sensor_4": 1.971049526496355,
+        "sensor_5": 1.7614686493662577,
+        "sensor_1_rolling_mean": 0.4282796847738453,
+        "sensor_3_rolling_mean": 3.1280393828362407
+      },
+      "warning": false,
+      "noise_floor": 0.40874247308442074
+    },
+    "last_canary_evidence": {
+      "observations": 100,
+      "production_mae": 8.08687799314013,
+      "canary_mae": 26.746204526874585,
+      "mean_difference": 18.659326533734458,
+      "ci_lower": 10.927723033656484,
+      "ci_upper": 26.39093003381243,
+      "margin": 0.24260633979420387,
+      "reason": "rolled_back"
+    }
+  },
+  "metrics": "# TYPE sentinel_canary_version gauge\nsentinel_canary_version 2.0\n# TYPE sentinel_drift_psi gauge\nsentinel_drift_psi 4.09610193629274\n# TYPE sentinel_holdout_mae gauge\nsentinel_holdout_mae 1.9822907471978275\n# TYPE sentinel_model_version gauge\nsentinel_model_version 1.0\n# TYPE sentinel_training_mae gauge\nsentinel_training_mae 1.3915435298322716\n# TYPE sentinel_bootstrap_total counter\nsentinel_bootstrap_total 1.0\n# TYPE sentinel_drift_breaches_total counter\nsentinel_drift_breaches_total 1.0\n# TYPE sentinel_fault_injections_total counter\nsentinel_fault_injections_total 1.0\n# TYPE sentinel_retrains_total counter\nsentinel_retrains_total 1.0\n# TYPE sentinel_rollbacks_total counter\nsentinel_rollbacks_total 1.0\n"
+}
