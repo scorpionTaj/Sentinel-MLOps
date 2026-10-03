@@ -65,17 +65,47 @@ Prometheus exporter.
 - **What is running today**: In-process NumPy core loop, FastAPI HTTP service, file-backed model registry, and containerized Prometheus + Grafana observability.
 - **Documented scale-out seams**: [Architecture decisions](docs/DECISIONS.md) detail the exact integration seams to swap in Kafka/Redpanda for event streaming, Spark + Delta Lake for medallion lakehouse storage, Dagster for asset orchestration, and MLflow for remote model registry management.
 
-## Real NASA C-MAPSS data
+## Data science workflow
 
-Place any 26-column `train_FD001.txt` through `train_FD004.txt` file under `data/reference/`, then load it
-with `sentinel.datasets.load_cmapps_training`. Official test partitions and terminal targets are
-supported by `sentinel.datasets.load_cmapps_test(test_path, rul_path, domain)`. The project does not silently download or redistribute
-the dataset. NASA currently publishes the dataset metadata and download resource through its
-[Open Data portal](https://data.nasa.gov/dataset/cmapss-jet-engine-simulated-data); availability can
-change, so the offline generator remains the reproducible default.
+The data-science side is organized so every reported number is regenerated from code:
 
-See [the exact problem and drift strategy](docs/PROBLEM.md) and the
-[reproducible local evaluation](docs/EVALUATION.md). The interactive architecture artifact is
+```text
+experiments/*.json          experiment configs (features, model, hyperparameter grid, seeds)
+src/sentinel/evaluation/    metrics, engine-grouped splits, C-MAPSS features, models,
+                            experiment runner, drift/canary calibration, report renderer
+reports/                    generated JSON results (committed; never edited by hand)
+notebooks/                  01 EDA · 02 drift & canary calibration · 03 model comparison
+docs/EVALUATION.md          generated from reports/ by `make report`
+docs/DATA_CARD.md           dataset provenance, labels, quirks
+docs/MODEL_CARD.md          serving model vs offline candidates, limits
+data/reference/MANIFEST.json  SHA-256 of every C-MAPSS file
+```
+
+```bash
+pip install -e ".[dev,notebooks]"
+make data        # download NASA C-MAPSS FD001–FD004 and verify checksums
+make eval        # run every experiment config on real data
+make calibrate   # Monte Carlo false-alarm, power and canary operating characteristic
+make report      # regenerate docs/EVALUATION.md (runs all of the above)
+make notebooks   # re-execute the notebooks
+```
+
+Headline results on the official C-MAPSS test sets (RMSE, RUL capped at 125, last-cycle protocol):
+
+| Model | FD001 | FD002 | FD003 | FD004 |
+| :--- | ---: | ---: | ---: | ---: |
+| Predict the training-set mean | 41.9 | 44.9 | 43.7 | 45.6 |
+| Serving ridge, 9 features, uncapped target (before) | 32.0 | 39.1 | 54.6 | 60.0 |
+| Serving ridge, capped target (now serving) | 22.2 | 29.0 | 21.9 | 37.1 |
+| Offline features + RBF kernel ridge (best offline) | 14.5 | 14.2 | 14.5 | 16.0 |
+
+See [EVALUATION.md](docs/EVALUATION.md) for confidence intervals, NASA scores, drift false-alarm
+and detection rates, and the canary operating characteristic. The live loop can also load real
+files directly with `sentinel.datasets.load_cmapps_training` / `load_cmapps_test`; research code
+uses `load_cmapps_arrays` (all 26 columns). The project never redistributes the dataset; NASA
+publishes it via its [Open Data portal](https://data.nasa.gov/dataset/cmapss-jet-engine-simulated-data).
+
+See [the exact problem and drift strategy](docs/PROBLEM.md). The interactive architecture artifact is
 generated from `architecture.json` and delivered as `architecture.html`. The detailed executable
 flow is captured separately in [`sentinel-dataflow.html`](sentinel-dataflow.html), generated from
 the validated [`sentinel-dataflow.json`](sentinel-dataflow.json) specification.
