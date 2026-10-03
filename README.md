@@ -4,6 +4,17 @@
 
 The real running stack executes locally in under a second with a pure **NumPy core loop**, **FastAPI serving**, and an optional **Prometheus + Grafana** Docker Compose observability profile. Distributed infrastructure tools (Kafka/Redpanda, Spark, Delta Lake, Dagster, MLflow) are explicitly documented scale-out seams in [`docs/DECISIONS.md`](docs/DECISIONS.md), not running background services.
 
+![Sentinel architecture: the in-process self-healing loop, FastAPI serving and observability, and the offline data-science workflow on NASA C-MAPSS](docs/architecture.svg)
+
+The diagram has three lanes. **Self-healing loop**: telemetry is featurized, quality-gated and
+scored for drift (PSI with a batch-size-aware alert line, plus an error-ratio trigger for concept
+drift); a breach retrains a candidate, which must pass an offline gate and a paired
+non-inferiority canary before promotion. **Serving & observability**: FastAPI drives the loop and
+feeds the control-room UI and Prometheus/Grafana. **Offline data science**: reproducible
+experiments and Monte Carlo calibration on real NASA C-MAPSS produce the committed reports;
+calibration (marked **A**) is what sets the online alert line and canary test. Dashed chips are
+documented scale-out seams or follow-ups, not running services.
+
 ## Prove the loop
 
 ```bash

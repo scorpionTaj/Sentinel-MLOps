@@ -1,0 +1,186 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 1000" width="1400" height="1000" role="img" aria-labelledby="t d">
+<title id="t">Sentinel MLOps architecture</title>
+<desc id="d">Three lanes: the in-process self-healing loop, the FastAPI serving and observability layer, and the offline data-science workflow on NASA C-MAPSS.</desc>
+<defs>
+<marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#c7ff4a"/></marker>
+<marker id="m" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#a2a59f"/></marker>
+<marker id="b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#6fa8ff"/></marker>
+<marker id="w" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#f2b84b"/></marker>
+</defs>
+<rect width="1400" height="1000" fill="#0b0d0c"/>
+<text x="40" y="50" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="26" font-weight="800" fill="#f3f0e8">Sentinel · self-healing MLOps architecture</text>
+<text x="40" y="74" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" fill="#a2a59f">Detect drift → retrain → validate → canary → promote or roll back, with evidence at every step.</text>
+<line x1="930" y1="46" x2="964" y2="46" stroke="#c7ff4a" stroke-width="1.6" marker-end="url(#a)"/>
+<text x="972" y="50" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="12" fill="#a2a59f">data / control flow</text>
+<rect x="1100" y="38" width="34" height="16" rx="8" fill="none" stroke="#a2a59f" stroke-dasharray="4 3"/>
+<text x="1142" y="50" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="12" fill="#a2a59f">scale-out seam / follow-up</text>
+<circle cx="947" cy="70" r="8" fill="#0b0d0c" stroke="#f2b84b" stroke-width="1.5"/><text x="947" y="74" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10" font-weight="700" fill="#f2b84b">A</text>
+<text x="972" y="74" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="12" fill="#a2a59f">offline study that sets an online rule</text>
+<rect x="20" y="100" width="1360" height="360" rx="4" fill="#101210" stroke="#2f342f"/>
+<text x="40" y="128" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12" font-weight="700" letter-spacing="1.5" fill="#c7ff4a">SELF-HEALING LOOP</text>
+<text x="205" y="128" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="12" fill="#a2a59f">in-process NumPy · sentinel.loop.HealingLoop</text>
+<rect x="40" y="150" width="190" height="96" rx="3" fill="#151715" stroke="#2f342f"/>
+<rect x="40" y="150" width="3" height="96" fill="#c7ff4a"/>
+<text x="56" y="176" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="14" font-weight="700" fill="#f3f0e8">Telemetry batches</text>
+<text x="56" y="197" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#a2a59f">synthetic fleet (demo)</text>
+<text x="56" y="213" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#a2a59f">C-MAPSS rows (benchmark)</text>
+<rect x="262" y="150" width="190" height="96" rx="3" fill="#151715" stroke="#2f342f"/>
+<rect x="262" y="150" width="3" height="96" fill="#c7ff4a"/>
+<text x="278" y="176" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="14" font-weight="700" fill="#f3f0e8">Feature pipeline</text>
+<text x="278" y="197" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#a2a59f">RollingFeaturePipeline</text>
+<text x="278" y="213" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#a2a59f">9 features per row</text>
+<text x="278" y="229" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#a2a59f">keyed by domain+engine</text>
+<rect x="484" y="150" width="190" height="96" rx="3" fill="#151715" stroke="#2f342f"/>
+<rect x="484" y="150" width="3" height="96" fill="#c7ff4a"/>
+<text x="500" y="176" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="14" font-weight="700" fill="#f3f0e8">Quality gate</text>
+<text x="500" y="197" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#a2a59f">finite · shape · RUL</text>
+<text x="500" y="213" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#a2a59f">rejects whole batch</text>
+<text x="500" y="229" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#a2a59f">→ validated Gold rows</text>
+<rect x="706" y="150" width="190" height="96" rx="3" fill="#151715" stroke="#2f342f"/>
+<rect x="706" y="150" width="3" height="96" fill="#f2b84b"/>
+<text x="722" y="176" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="14" font-weight="700" fill="#f3f0e8">Drift monitor</text>
+<text x="722" y="197" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#a2a59f">PSI on 8 covariates</text>
+<text x="722" y="213" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#a2a59f">alert=max(0.20, noise)</text>
+<text x="722" y="229" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#f2b84b">error ≥4× → concept drift</text>
+<circle cx="880" cy="168" r="10" fill="#0b0d0c" stroke="#f2b84b" stroke-width="1.5"/>
+<text x="880" y="172" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" font-weight="700" fill="#f2b84b">A</text>
+<rect x="928" y="150" width="190" height="96" rx="3" fill="#151715" stroke="#2f342f"/>
+<rect x="928" y="150" width="3" height="96" fill="#c7ff4a"/>
+<text x="944" y="176" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="14" font-weight="700" fill="#f3f0e8">Retrain + offline gate</text>
+<text x="944" y="197" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#a2a59f">engine-grouped split</text>
+<text x="944" y="213" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#a2a59f">ridge · RUL capped 125</text>
+<text x="944" y="229" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#a2a59f">MAE ≤ production +5%</text>
+<rect x="1150" y="150" width="190" height="96" rx="3" fill="#151715" stroke="#2f342f"/>
+<rect x="1150" y="150" width="3" height="96" fill="#c7ff4a"/>
+<text x="1166" y="176" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="14" font-weight="700" fill="#f3f0e8">Model registry</text>
+<text x="1166" y="197" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#a2a59f">FileModelRegistry</text>
+<text x="1166" y="213" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#a2a59f">aliases: production,</text>
+<text x="1166" y="229" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#a2a59f">canary · event history</text>
+<path d="M230,198 H258" fill="none" stroke="#c7ff4a" stroke-width="1.6" marker-end="url(#a)"/>
+<path d="M452,198 H480" fill="none" stroke="#c7ff4a" stroke-width="1.6" marker-end="url(#a)"/>
+<path d="M674,198 H702" fill="none" stroke="#c7ff4a" stroke-width="1.6" marker-end="url(#a)"/>
+<path d="M896,198 H924" fill="none" stroke="#c7ff4a" stroke-width="1.6" marker-end="url(#a)"/>
+<path d="M1118,198 H1146" fill="none" stroke="#c7ff4a" stroke-width="1.6" marker-end="url(#a)"/>
+<text x="912" y="142" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10.5" fill="#c7ff4a">breach</text>
+<rect x="40" y="258" width="165" height="22" rx="11" fill="none" stroke="#a2a59f" stroke-dasharray="4 3"/>
+<text x="123" y="273" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10.5" fill="#a2a59f">seam: Kafka / Redpanda</text>
+<rect x="262" y="258" width="145" height="22" rx="11" fill="none" stroke="#a2a59f" stroke-dasharray="4 3"/>
+<text x="335" y="273" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10.5" fill="#a2a59f">seam: Spark + Delta</text>
+<rect x="928" y="258" width="105" height="22" rx="11" fill="none" stroke="#a2a59f" stroke-dasharray="4 3"/>
+<text x="981" y="273" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10.5" fill="#a2a59f">seam: Dagster</text>
+<rect x="1150" y="258" width="100" height="22" rx="11" fill="none" stroke="#a2a59f" stroke-dasharray="4 3"/>
+<text x="1200" y="273" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10.5" fill="#a2a59f">seam: MLflow</text>
+<rect x="1150" y="330" width="190" height="96" rx="3" fill="#151715" stroke="#2f342f"/>
+<rect x="1150" y="330" width="3" height="96" fill="#c7ff4a"/>
+<text x="1166" y="356" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="14" font-weight="700" fill="#f3f0e8">Canary router</text>
+<text x="1166" y="377" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#a2a59f">SHA-256 traffic split</text>
+<text x="1166" y="393" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#a2a59f">shadow-scores every row</text>
+<text x="1166" y="409" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#a2a59f">paired non-inferiority</text>
+<circle cx="1324" cy="348" r="10" fill="#0b0d0c" stroke="#f2b84b" stroke-width="1.5"/>
+<text x="1324" y="352" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" font-weight="700" fill="#f2b84b">A</text>
+<path d="M1262,246 V326" fill="none" stroke="#c7ff4a" stroke-width="1.6" marker-end="url(#a)"/>
+<text x="1254" y="314" text-anchor="end" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10.5" fill="#c7ff4a">deploy canary</text>
+<path d="M1314,330 V250" fill="none" stroke="#c7ff4a" stroke-width="1.6" marker-end="url(#a)"/>
+<text x="1322" y="300" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10.5" fill="#c7ff4a">promote /</text>
+<text x="1322" y="314" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10.5" fill="#c7ff4a">roll back</text>
+<path d="M1150,400 H801 V250" fill="none" stroke="#c7ff4a" stroke-width="1.6" stroke-dasharray="6 4" marker-end="url(#a)"/>
+<text x="1015.5" y="392" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10.5" fill="#c7ff4a">on promotion: refit drift reference</text>
+<rect x="20" y="480" width="1360" height="190" rx="4" fill="#101210" stroke="#2f342f"/>
+<text x="40" y="508" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12" font-weight="700" letter-spacing="1.5" fill="#6fa8ff">SERVING &amp; OBSERVABILITY</text>
+<text x="259" y="508" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="12" fill="#a2a59f">FastAPI · Docker Compose profile</text>
+<rect x="40" y="530" width="190" height="96" rx="3" fill="#151715" stroke="#2f342f"/>
+<rect x="40" y="530" width="3" height="96" fill="#6fa8ff"/>
+<text x="56" y="556" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="14" font-weight="700" fill="#f3f0e8">Operator / client</text>
+<text x="56" y="577" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#a2a59f">browser · curl</text>
+<text x="56" y="593" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#a2a59f">Prometheus scraper</text>
+<rect x="262" y="530" width="190" height="96" rx="3" fill="#151715" stroke="#2f342f"/>
+<rect x="262" y="530" width="3" height="96" fill="#6fa8ff"/>
+<text x="278" y="556" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="14" font-weight="700" fill="#f3f0e8">Control-room UI</text>
+<text x="278" y="577" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#a2a59f">polls /status every 4 s</text>
+<text x="278" y="593" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#a2a59f">drift &amp; canary evidence</text>
+<text x="278" y="609" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#a2a59f">timeline · ledger</text>
+<rect x="484" y="530" width="190" height="96" rx="3" fill="#151715" stroke="#2f342f"/>
+<rect x="484" y="530" width="3" height="96" fill="#6fa8ff"/>
+<text x="500" y="556" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="14" font-weight="700" fill="#f3f0e8">FastAPI service</text>
+<text x="500" y="577" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#a2a59f">/simulate-drift</text>
+<text x="500" y="593" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#a2a59f">/simulate-regression</text>
+<text x="500" y="609" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#a2a59f">/predict /status /metrics</text>
+<rect x="706" y="530" width="190" height="96" rx="3" fill="#151715" stroke="#2f342f"/>
+<rect x="706" y="530" width="3" height="96" fill="#6fa8ff"/>
+<text x="722" y="556" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="14" font-weight="700" fill="#f3f0e8">Prometheus</text>
+<text x="722" y="577" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#a2a59f">scrapes /metrics</text>
+<text x="722" y="593" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#a2a59f">PSI · versions</text>
+<text x="722" y="609" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#a2a59f">promotions · rollbacks</text>
+<rect x="928" y="530" width="190" height="96" rx="3" fill="#151715" stroke="#2f342f"/>
+<rect x="928" y="530" width="3" height="96" fill="#6fa8ff"/>
+<text x="944" y="556" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="14" font-weight="700" fill="#f3f0e8">Grafana</text>
+<text x="944" y="577" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#a2a59f">provisioned dashboard</text>
+<text x="944" y="593" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#a2a59f">release evidence panels</text>
+<rect x="1150" y="530" width="190" height="96" rx="3" fill="#151715" stroke="#2f342f"/>
+<rect x="1150" y="530" width="3" height="96" fill="#a2a59f"/>
+<text x="1166" y="556" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="14" font-weight="700" fill="#f3f0e8">CI · GitHub Actions</text>
+<text x="1166" y="577" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#a2a59f">ruff · pytest</text>
+<text x="1166" y="593" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#a2a59f">web file-mode guard</text>
+<text x="1166" y="609" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#a2a59f">demos · report renders</text>
+<path d="M230,578 H258" fill="none" stroke="#6fa8ff" stroke-width="1.6" marker-end="url(#b)"/>
+<path d="M452,578 H480" fill="none" stroke="#6fa8ff" stroke-width="1.6" marker-end="url(#b)"/>
+<path d="M706,578 H678" fill="none" stroke="#6fa8ff" stroke-width="1.6" marker-end="url(#b)"/>
+<path d="M896,578 H924" fill="none" stroke="#6fa8ff" stroke-width="1.6" marker-end="url(#b)"/>
+<path d="M579,530 V464" fill="none" stroke="#6fa8ff" stroke-width="1.6" marker-end="url(#b)"/>
+<path d="M579,460 V250" fill="none" stroke="#6fa8ff" stroke-width="1.6" marker-end="url(#b)"/>
+<text x="589" y="440" text-anchor="start" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10.5" fill="#6fa8ff">process · predict · status</text>
+<rect x="20" y="690" width="1360" height="290" rx="4" fill="#101210" stroke="#2f342f"/>
+<text x="40" y="718" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12" font-weight="700" letter-spacing="1.5" fill="#f2b84b">OFFLINE DATA SCIENCE</text>
+<text x="232" y="718" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="12" fill="#a2a59f">make data · eval · calibrate · report  (sentinel.evaluation)</text>
+<rect x="40" y="740" width="190" height="96" rx="3" fill="#151715" stroke="#2f342f"/>
+<rect x="40" y="740" width="3" height="96" fill="#f2b84b"/>
+<text x="56" y="766" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="14" font-weight="700" fill="#f3f0e8">NASA C-MAPSS</text>
+<text x="56" y="787" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#a2a59f">FD001–FD004 · 12 files</text>
+<text x="56" y="803" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#a2a59f">make data verifies</text>
+<text x="56" y="819" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#a2a59f">SHA-256 MANIFEST.json</text>
+<rect x="262" y="740" width="190" height="96" rx="3" fill="#151715" stroke="#2f342f"/>
+<rect x="262" y="740" width="3" height="96" fill="#f2b84b"/>
+<text x="278" y="766" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="14" font-weight="700" fill="#f3f0e8">Offline features</text>
+<text x="278" y="787" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#a2a59f">14 informative sensors</text>
+<text x="278" y="803" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#a2a59f">k-means regime z-score</text>
+<text x="278" y="819" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#a2a59f">rolling mean/slope/std</text>
+<rect x="484" y="740" width="190" height="96" rx="3" fill="#151715" stroke="#2f342f"/>
+<rect x="484" y="740" width="3" height="96" fill="#f2b84b"/>
+<text x="500" y="766" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="14" font-weight="700" fill="#f3f0e8">Experiment runner</text>
+<text x="500" y="787" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#a2a59f">experiments/*.json</text>
+<text x="500" y="803" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#a2a59f">grouped 5-fold CV</text>
+<text x="500" y="819" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#a2a59f">last-cycle test protocol</text>
+<rect x="928" y="740" width="190" height="96" rx="3" fill="#151715" stroke="#2f342f"/>
+<rect x="928" y="740" width="3" height="96" fill="#f2b84b"/>
+<text x="944" y="766" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="14" font-weight="700" fill="#f3f0e8">reports/*.json</text>
+<text x="944" y="787" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#a2a59f">RMSE · NASA score</text>
+<text x="944" y="803" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#a2a59f">bootstrap CIs · seeds</text>
+<text x="944" y="819" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#a2a59f">committed results</text>
+<rect x="1150" y="740" width="190" height="96" rx="3" fill="#151715" stroke="#2f342f"/>
+<rect x="1150" y="740" width="3" height="96" fill="#f2b84b"/>
+<text x="1166" y="766" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="14" font-weight="700" fill="#f3f0e8">Docs &amp; notebooks</text>
+<text x="1166" y="787" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#a2a59f">EVALUATION.md (generated)</text>
+<text x="1166" y="803" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#a2a59f">3 executed notebooks</text>
+<text x="1166" y="819" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#a2a59f">data &amp; model cards</text>
+<rect x="706" y="860" width="190" height="96" rx="3" fill="#151715" stroke="#2f342f"/>
+<rect x="706" y="860" width="3" height="96" fill="#f2b84b"/>
+<text x="722" y="886" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="14" font-weight="700" fill="#f3f0e8">Calibration</text>
+<text x="722" y="907" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#a2a59f">Monte Carlo, 200 trials</text>
+<text x="722" y="923" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#a2a59f">false alarms · power</text>
+<text x="722" y="939" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#a2a59f">canary operating curve</text>
+<circle cx="880" cy="878" r="10" fill="#0b0d0c" stroke="#f2b84b" stroke-width="1.5"/>
+<text x="880" y="882" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" font-weight="700" fill="#f2b84b">A</text>
+<path d="M230,788 H258" fill="none" stroke="#f2b84b" stroke-width="1.6" marker-end="url(#w)"/>
+<path d="M452,788 H480" fill="none" stroke="#f2b84b" stroke-width="1.6" marker-end="url(#w)"/>
+<path d="M674,788 H924" fill="none" stroke="#f2b84b" stroke-width="1.6" marker-end="url(#w)"/>
+<text x="801.0" y="780" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10.5" fill="#f2b84b">mean · ridge · quadratic · RFF</text>
+<path d="M1118,788 H1146" fill="none" stroke="#f2b84b" stroke-width="1.6" marker-end="url(#w)"/>
+<path d="M135,836 V908 H702" fill="none" stroke="#f2b84b" stroke-width="1.6" marker-end="url(#w)"/>
+<path d="M896,908 H1023 V840" fill="none" stroke="#f2b84b" stroke-width="1.6" marker-end="url(#w)"/>
+<rect x="484" y="848" width="206" height="22" rx="11" fill="none" stroke="#a2a59f" stroke-dasharray="4 3"/>
+<text x="587" y="863" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10.5" fill="#a2a59f">follow-up: best model → serving</text>
+<text x="1040" y="866" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11.5" fill="#a2a59f">best offline test RMSE</text>
+<text x="1040" y="884" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11.5" fill="#f3f0e8">FD001  14.5   FD002  14.2</text>
+<text x="1040" y="900" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11.5" fill="#f3f0e8">FD003  14.5   FD004  16.0</text>
+<text x="1040" y="918" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11.5" fill="#a2a59f">(serving model today: 22.2 · 29.0 · 21.9 · 37.1)</text>
+</svg>
