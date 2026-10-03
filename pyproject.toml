@@ -29,12 +29,18 @@ sentinel = ["web/*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+pythonpath = ["src"]
 addopts = "-q"
 
 [tool.ruff]
 line-length = 100
 target-version = "py311"
 src = ["src"]
+
+[tool.ruff.lint.per-file-ignores]
+# Both modules extend sys.path before importing so they work in serverless runtimes.
+"src/sentinel/__init__.py" = ["E402"]
+"src/sentinel/api.py" = ["E402"]
 
 [tool.ruff.lint.isort]
 known-first-party = ["sentinel"]
