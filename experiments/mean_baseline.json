@@ -1,0 +1,25 @@
+{
+  "name": "mean_baseline",
+  "description": "Predict the training-set mean RUL (capped). Floor every model must beat.",
+  "datasets": [
+    "FD001",
+    "FD002",
+    "FD003",
+    "FD004"
+  ],
+  "cv_folds": 5,
+  "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "rul_cap": 125,
+  "features": {
+    "set": "serving"
+  },
+  "model": {
+    "type": "mean"
+  }
+}

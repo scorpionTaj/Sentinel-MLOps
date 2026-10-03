@@ -1,7 +1,10 @@
 from __future__ import annotations
 
 from collections import defaultdict
+from dataclasses import dataclass
 from pathlib import Path
+
+import numpy as np
 
 from sentinel.scenarios import get_scenario
 from sentinel.types import TelemetryRow
@@ -84,3 +87,77 @@ def load_cmapps_test(test_path: Path, rul_path: Path, domain: str) -> list[Telem
         for engine_id, terminal_rul in zip(engine_ids, ruls, strict=True)
     }
     return _telemetry_rows(parsed, domain, end_of_life)
+
+
+@dataclass(frozen=True)
+class CMAPSSArrays:
+    """All 26 C-MAPSS columns as arrays, for offline research (the live loop uses TelemetryRow)."""
+
+    domain: str
+    engine: np.ndarray
+    cycle: np.ndarray
+    settings: np.ndarray
+    sensors: np.ndarray
+    rul: np.ndarray
+
+    def __len__(self) -> int:
+        return len(self.engine)
+
+    def last_cycle_mask(self) -> np.ndarray:
+        """True on each engine's final observed row (the official test-set evaluation point)."""
+
+        is_last = np.ones(len(self.engine), dtype=bool)
+        is_last[:-1] = self.engine[1:] != self.engine[:-1]
+        return is_last
+
+    def subset(self, mask: np.ndarray) -> CMAPSSArrays:
+        return CMAPSSArrays(
+            self.domain,
+            self.engine[mask],
+            self.cycle[mask],
+            self.settings[mask],
+            self.sensors[mask],
+            self.rul[mask],
+        )
+
+
+def _load_matrix(path: Path) -> np.ndarray:
+    matrix = np.loadtxt(path, ndmin=2)
+    if matrix.size == 0:
+        raise ValueError(f"{path}: dataset is empty")
+    if matrix.shape[1] != 26:
+        raise ValueError(f"{path}: expected 26 columns, found {matrix.shape[1]}")
+    return matrix
+
+
+def load_cmapps_arrays(
+    path: Path, domain: str, rul_path: Path | None = None
+) -> CMAPSSArrays:
+    """Load a train (RUL from last cycle) or test (RUL from RUL_FD00x.txt) file as arrays."""
+
+    _validate_domain(domain)
+    matrix = _load_matrix(path)
+    engine = matrix[:, 0].astype(int)
+    cycle = matrix[:, 1].astype(int)
+    if np.any(np.diff(engine) < 0):
+        raise ValueError(f"{path}: rows must be grouped by ascending engine id")
+    engines = np.unique(engine)
+    max_cycle = {e: int(cycle[engine == e].max()) for e in engines}
+    if rul_path is None:
+        offsets = dict.fromkeys(engines, 0.0)
+    else:
+        terminal = np.loadtxt(rul_path, ndmin=1)
+        if len(terminal) != len(engines):
+            raise ValueError(
+                f"{rul_path}: expected {len(engines)} terminal RUL values, found {len(terminal)}"
+            )
+        offsets = dict(zip(engines, terminal.astype(float), strict=True))
+    end_of_life = np.array([max_cycle[e] + offsets[e] for e in engine], dtype=float)
+    return CMAPSSArrays(
+        domain=domain,
+        engine=engine,
+        cycle=cycle,
+        settings=matrix[:, 2:5],
+        sensors=matrix[:, 5:],
+        rul=end_of_life - cycle,
+    )
