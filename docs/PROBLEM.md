@@ -12,10 +12,30 @@ Population Stability Index (PSI) quantifies shift between a baseline reference d
 
 $$\text{PSI} = \sum_{b=1}^{B} (P_b - Q_b) \times \ln\left(\frac{P_b}{Q_b}\right)$$
 
-### Decision Thresholds
-- **$\text{PSI} < 0.10$**: Stable distribution. Baseline model remains in full production.
-- **$0.10 \le \text{PSI} \le 0.25$**: Moderate shift. Warning logged; evidence buffered.
-- **$\text{PSI} \ge 0.20$ (Configurable Safety Line)**: Distributional breach. Sentinel initiates automated retraining, validates candidate against production on recent observations, and deploys a canary.
+PSI is computed per monitored feature on 8 reference-quantile bins with a 0.5 pseudo-count per bin,
+and the batch score is the maximum over features. `cycle_scaled` is **not** monitored: it is a time
+index, so a batch of shorter engine histories would look like drift without any change in the data.
+
+### Decision rule
+- **Alert line** = max(0.20, noise floor). The noise floor is the PSI that sampling noise alone
+  exceeds with 1% family-wise probability: χ²₇ quantile × (1/n_batch + 1/n_reference). It only
+  binds for small batches (≈0.55 at 50 rows, ≈0.13 at 400 rows against a 360-row reference).
+- **Warning** (`drift_warning` event): PSI between half the alert line and the alert line.
+- **Breach** (`drift_detected`): Sentinel retrains on the batch (engine-grouped validation),
+  applies the offline gate, and starts a canary.
+- After a promotion, the reference is re-fitted on the promoted model's training window, so the
+  new regime becomes the baseline.
+
+### Second trigger: performance degradation (concept drift)
+PSI only sees input distributions. A regime can keep every input distribution and still break the
+model; `ADVERSARIAL` inverts the sensor-to-RUL relationship, and after an FD002 promotion it scores
+PSI ≈ 0.08. Because each batch arrives with labels, the loop also compares production MAE on the
+batch with the model's recorded validation MAE. At ≥ 4× (stable batches measure 1.4–3.0×) it emits
+`performance_degraded` and retrains exactly as for a PSI breach.
+
+Each report also carries `feature_shift` (|Δmean| in reference σ), an unbounded effect size that
+keeps ranking severity once binned PSI saturates. Measured false-alarm and detection rates are in
+[EVALUATION.md](EVALUATION.md) §2.
 
 ---
 
@@ -42,9 +62,16 @@ A model that passes offline validation may still fail in production due to servi
 
 1. **Deterministic Canary Routing**: Live inference requests are routed using cryptographic SHA-256 bucketing (`bucket = sha256(request_id) < canary_weight`).
 2. **Shadow Scoring**: Predictions from both the active production model and the canary candidate are recorded alongside observed ground truth.
-3. **Automated Promotion vs. Rollback**:
-   - **Promotion**: When canary MAE is superior or within `regression_tolerance` over `canary_min_observations`, the canary is promoted to production.
-   - **Rollback**: If the canary exhibits serving regression (simulated via `/simulate-regression`), the canary alias is immediately revoked, protecting production baseline traffic.
+3. **Automated Promotion vs. Rollback** (paired non-inferiority test on shadow absolute errors,
+   d = |canary error| − |production error|, margin = `canary_regression_tolerance` × production MAE):
+   - **Promotion**: after at least `canary_min_observations`, the 95% upper bound of mean(d) is
+     within the margin.
+   - **Rollback**: the 95% lower bound exceeds the margin (e.g. the serving regression injected by
+     `/simulate-regression`).
+   - **Inconclusive**: keep collecting; if still undecided at `canary_max_observations`
+     (default 4× the minimum), roll back and keep production.
+
+Targets are capped at 125 cycles (`rul_cap`) for both training and shadow scoring.
 
 ---
 

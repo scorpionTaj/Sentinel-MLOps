@@ -59,9 +59,9 @@ Sentinel implements four consecutive safety boundaries before any candidate can 
           │ (Validated Gold)
           ▼
 ┌──────────────────┐
-│  Drift Detector  │ ──(PSI < 0.20)──> [ Keep Serving Production ]
+│  Drift Detector  │ ──(PSI < alert line)──> [ Keep Serving Production ]
 └──────────────────┘
-          │ (PSI ≥ 0.20 Threshold Breach)
+          │ (PSI ≥ max(0.20, noise floor): breach)
           ▼
 ┌──────────────────┐
 │   Retrain Loop   │ 

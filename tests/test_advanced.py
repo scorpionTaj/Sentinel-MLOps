@@ -21,11 +21,14 @@ class AdvancedSafetyTests(unittest.TestCase):
     def test_all_supported_drift_regimes_cross_the_threshold(self) -> None:
         matrix = run_dataset_matrix()
 
-        self.assertEqual(set(matrix), set(drift_scenario_ids()))
+        self.assertEqual(set(matrix), {"FD001", *drift_scenario_ids()})
         for domain, result in matrix.items():
             with self.subTest(domain=domain):
-                self.assertTrue(result["detected"])
-                self.assertIn("drift_detected", result["event_kinds"])
+                self.assertEqual(result["detected"], result["expected_detected"])
+                if result["expected_detected"]:
+                    self.assertIn("drift_detected", result["event_kinds"])
+                else:
+                    self.assertNotIn("drift_detected", result["event_kinds"])
 
     def test_every_scenario_is_deterministic_for_a_fixed_seed(self) -> None:
         for domain in ("FD001", *drift_scenario_ids()):
@@ -96,9 +99,9 @@ class AdvancedSafetyTests(unittest.TestCase):
 
 
 def detector_feature_names() -> tuple[str, ...]:
-    from sentinel.features import FEATURE_NAMES
+    from sentinel.features import MONITORED_FEATURES
 
-    return FEATURE_NAMES
+    return MONITORED_FEATURES
 
 
 if __name__ == "__main__":

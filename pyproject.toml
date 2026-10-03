@@ -17,6 +17,7 @@ dependencies = [
 [project.optional-dependencies]
 api = ["fastapi>=0.116,<1", "uvicorn[standard]>=0.35,<1"]
 dev = ["fastapi>=0.116,<1", "httpx>=0.28,<1", "pytest>=8.4,<9", "ruff>=0.12,<1"]
+notebooks = ["matplotlib>=3.8,<4", "nbconvert>=7,<8", "ipykernel>=6,<8"]
 
 [project.scripts]
 sentinel = "sentinel.cli:main"
@@ -29,12 +30,18 @@ sentinel = ["web/*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+pythonpath = ["src"]
 addopts = "-q"
 
 [tool.ruff]
 line-length = 100
 target-version = "py311"
 src = ["src"]
+
+[tool.ruff.lint.per-file-ignores]
+# Both modules extend sys.path before importing so they work in serverless runtimes.
+"src/sentinel/__init__.py" = ["E402"]
+"src/sentinel/api.py" = ["E402"]
 
 [tool.ruff.lint.isort]
 known-first-party = ["sentinel"]

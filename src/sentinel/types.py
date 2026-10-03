@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, field
 from typing import Literal
 
 ReleaseState = Literal["candidate", "canary", "production", "rejected", "rolled_back"]
@@ -22,6 +22,7 @@ class FeatureRow:
     values: tuple[float, ...]
     target: float
     domain: str
+    group: str = ""
 
 
 @dataclass(frozen=True, slots=True)
@@ -37,6 +38,9 @@ class DriftReport:
     aggregate_psi: float
     feature_psi: dict[str, float]
     threshold: float
+    feature_shift: dict[str, float] = field(default_factory=dict)
+    warning: bool = False
+    noise_floor: float = 0.0
 
     def to_dict(self) -> dict[str, object]:
         return asdict(self)
@@ -48,6 +52,7 @@ class PipelineEvent:
     kind: str
     detail: str
     value: float | None = None
+    version: int | None = None
 
     def to_dict(self) -> dict[str, object]:
         return asdict(self)

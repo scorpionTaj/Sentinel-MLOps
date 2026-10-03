@@ -1,0 +1,388 @@
+{
+  "trials": 200,
+  "legacy_rule": "max PSI over 9 features incl. cycle_scaled, 1e-6 bin floor, >= 0.20",
+  "current_rule": "max PSI over 8 monitored features, Jeffreys smoothing, >= max(0.20, chi-square noise floor at 1% family-wise false-alarm rate)",
+  "synthetic_false_alarms": {
+    "50": {
+      "current": 0.0,
+      "legacy": 0.71,
+      "noise_floor": 0.5456236733731571,
+      "trials": 200
+    },
+    "100": {
+      "current": 0.005,
+      "legacy": 0.15,
+      "noise_floor": 0.30608157286786863,
+      "trials": 200
+    },
+    "200": {
+      "current": 0.0,
+      "legacy": 0.0,
+      "noise_floor": 0.18631052261522435,
+      "trials": 200
+    },
+    "400": {
+      "current": 0.0,
+      "legacy": 0.0,
+      "noise_floor": 0.12642499748890226,
+      "trials": 200
+    }
+  },
+  "real": {
+    "reference": "FD001 engines 1-70",
+    "holdout": "FD001 engines 71-100",
+    "batch_sampling": "fleet cross-section (rows drawn across holdout engines)",
+    "false_alarms": {
+      "50": {
+        "current": 0.015,
+        "legacy": 0.88,
+        "noise_floor": 0.4807794741917892,
+        "trials": 200
+      },
+      "100": {
+        "current": 0.015,
+        "legacy": 0.145,
+        "noise_floor": 0.2412373736865007,
+        "trials": 200
+      },
+      "200": {
+        "current": 0.0,
+        "legacy": 0.0,
+        "noise_floor": 0.12146632343385648,
+        "trials": 200
+      },
+      "400": {
+        "current": 0.0,
+        "legacy": 0.0,
+        "noise_floor": 0.061580798307534344,
+        "trials": 200
+      }
+    },
+    "false_alarms_single_engine_windows": {
+      "50": {
+        "current": 1.0,
+        "legacy": 1.0,
+        "noise_floor": 0.4807794741917892,
+        "trials": 200
+      },
+      "100": {
+        "current": 0.995,
+        "legacy": 1.0,
+        "noise_floor": 0.2412373736865007,
+        "trials": 200
+      },
+      "200": {
+        "current": 0.955,
+        "legacy": 0.975,
+        "noise_floor": 0.12146632343385648,
+        "trials": 200
+      },
+      "400": {
+        "current": 0.785,
+        "legacy": 0.82,
+        "noise_floor": 0.061580798307534344,
+        "trials": 200
+      }
+    },
+    "detection": {
+      "FD002": {
+        "50": {
+          "current": 1.0,
+          "legacy": 1.0,
+          "noise_floor": 0.4807794741917892,
+          "trials": 200
+        },
+        "100": {
+          "current": 1.0,
+          "legacy": 1.0,
+          "noise_floor": 0.2412373736865007,
+          "trials": 200
+        },
+        "200": {
+          "current": 1.0,
+          "legacy": 1.0,
+          "noise_floor": 0.12146632343385648,
+          "trials": 200
+        },
+        "400": {
+          "current": 1.0,
+          "legacy": 1.0,
+          "noise_floor": 0.061580798307534344,
+          "trials": 200
+        }
+      },
+      "FD003": {
+        "50": {
+          "current": 0.855,
+          "legacy": 0.995,
+          "noise_floor": 0.4807794741917892,
+          "trials": 200
+        },
+        "100": {
+          "current": 1.0,
+          "legacy": 1.0,
+          "noise_floor": 0.2412373736865007,
+          "trials": 200
+        },
+        "200": {
+          "current": 1.0,
+          "legacy": 1.0,
+          "noise_floor": 0.12146632343385648,
+          "trials": 200
+        },
+        "400": {
+          "current": 1.0,
+          "legacy": 1.0,
+          "noise_floor": 0.061580798307534344,
+          "trials": 200
+        }
+      },
+      "FD004": {
+        "50": {
+          "current": 1.0,
+          "legacy": 1.0,
+          "noise_floor": 0.4807794741917892,
+          "trials": 200
+        },
+        "100": {
+          "current": 1.0,
+          "legacy": 1.0,
+          "noise_floor": 0.2412373736865007,
+          "trials": 200
+        },
+        "200": {
+          "current": 1.0,
+          "legacy": 1.0,
+          "noise_floor": 0.12146632343385648,
+          "trials": 200
+        },
+        "400": {
+          "current": 1.0,
+          "legacy": 1.0,
+          "noise_floor": 0.061580798307534344,
+          "trials": 200
+        }
+      }
+    },
+    "power_sensor_2_bias_sigma": {
+      "100": {
+        "0.0": {
+          "current": 0.025,
+          "legacy": 0.11,
+          "noise_floor": 0.2412373736865007,
+          "trials": 200
+        },
+        "0.1": {
+          "current": 0.005,
+          "legacy": 0.165,
+          "noise_floor": 0.2412373736865007,
+          "trials": 200
+        },
+        "0.2": {
+          "current": 0.025,
+          "legacy": 0.165,
+          "noise_floor": 0.2412373736865007,
+          "trials": 200
+        },
+        "0.3": {
+          "current": 0.135,
+          "legacy": 0.38,
+          "noise_floor": 0.2412373736865007,
+          "trials": 200
+        },
+        "0.5": {
+          "current": 0.735,
+          "legacy": 0.885,
+          "noise_floor": 0.2412373736865007,
+          "trials": 200
+        },
+        "0.75": {
+          "current": 1.0,
+          "legacy": 1.0,
+          "noise_floor": 0.2412373736865007,
+          "trials": 200
+        },
+        "1.0": {
+          "current": 1.0,
+          "legacy": 1.0,
+          "noise_floor": 0.2412373736865007,
+          "trials": 200
+        },
+        "1.5": {
+          "current": 1.0,
+          "legacy": 1.0,
+          "noise_floor": 0.2412373736865007,
+          "trials": 200
+        }
+      },
+      "400": {
+        "0.0": {
+          "current": 0.0,
+          "legacy": 0.0,
+          "noise_floor": 0.061580798307534344,
+          "trials": 200
+        },
+        "0.1": {
+          "current": 0.0,
+          "legacy": 0.0,
+          "noise_floor": 0.061580798307534344,
+          "trials": 200
+        },
+        "0.2": {
+          "current": 0.0,
+          "legacy": 0.0,
+          "noise_floor": 0.061580798307534344,
+          "trials": 200
+        },
+        "0.3": {
+          "current": 0.0,
+          "legacy": 0.0,
+          "noise_floor": 0.061580798307534344,
+          "trials": 200
+        },
+        "0.5": {
+          "current": 0.875,
+          "legacy": 0.895,
+          "noise_floor": 0.061580798307534344,
+          "trials": 200
+        },
+        "0.75": {
+          "current": 1.0,
+          "legacy": 1.0,
+          "noise_floor": 0.061580798307534344,
+          "trials": 200
+        },
+        "1.0": {
+          "current": 1.0,
+          "legacy": 1.0,
+          "noise_floor": 0.061580798307534344,
+          "trials": 200
+        },
+        "1.5": {
+          "current": 1.0,
+          "legacy": 1.0,
+          "noise_floor": 0.061580798307534344,
+          "trials": 200
+        }
+      }
+    }
+  },
+  "canary": {
+    "tolerance": 0.03,
+    "trials": 200,
+    "curves": {
+      "50": [
+        {
+          "true_relative_mae_change": -0.2575331401329247,
+          "promote_rate": 1.0,
+          "legacy_promote_rate": 1.0,
+          "mean_observations_used": 50.0
+        },
+        {
+          "true_relative_mae_change": -0.11385080944840087,
+          "promote_rate": 1.0,
+          "legacy_promote_rate": 1.0,
+          "mean_observations_used": 51.145
+        },
+        {
+          "true_relative_mae_change": -0.046057922500946646,
+          "promote_rate": 0.97,
+          "legacy_promote_rate": 0.97,
+          "mean_observations_used": 73.99
+        },
+        {
+          "true_relative_mae_change": -0.0071754311841080165,
+          "promote_rate": 0.595,
+          "legacy_promote_rate": 0.815,
+          "mean_observations_used": 136.075
+        },
+        {
+          "true_relative_mae_change": 0.031789448250677754,
+          "promote_rate": 0.13,
+          "legacy_promote_rate": 0.505,
+          "mean_observations_used": 175.56
+        },
+        {
+          "true_relative_mae_change": 0.07082720077655269,
+          "promote_rate": 0.005,
+          "legacy_promote_rate": 0.155,
+          "mean_observations_used": 117.92
+        },
+        {
+          "true_relative_mae_change": 0.10995737467714384,
+          "promote_rate": 0.0,
+          "legacy_promote_rate": 0.03,
+          "mean_observations_used": 65.78
+        },
+        {
+          "true_relative_mae_change": 0.17858451886501725,
+          "promote_rate": 0.0,
+          "legacy_promote_rate": 0.0,
+          "mean_observations_used": 50.495
+        },
+        {
+          "true_relative_mae_change": 0.3260429892630754,
+          "promote_rate": 0.0,
+          "legacy_promote_rate": 0.0,
+          "mean_observations_used": 50.0
+        }
+      ],
+      "150": [
+        {
+          "true_relative_mae_change": -0.2575331401329247,
+          "promote_rate": 1.0,
+          "legacy_promote_rate": 1.0,
+          "mean_observations_used": 150.0
+        },
+        {
+          "true_relative_mae_change": -0.11385080944840087,
+          "promote_rate": 1.0,
+          "legacy_promote_rate": 1.0,
+          "mean_observations_used": 150.0
+        },
+        {
+          "true_relative_mae_change": -0.046057922500946646,
+          "promote_rate": 1.0,
+          "legacy_promote_rate": 1.0,
+          "mean_observations_used": 155.52
+        },
+        {
+          "true_relative_mae_change": -0.0071754311841080165,
+          "promote_rate": 0.94,
+          "legacy_promote_rate": 0.96,
+          "mean_observations_used": 262.13
+        },
+        {
+          "true_relative_mae_change": 0.031789448250677754,
+          "promote_rate": 0.105,
+          "legacy_promote_rate": 0.4,
+          "mean_observations_used": 522.135
+        },
+        {
+          "true_relative_mae_change": 0.07082720077655269,
+          "promote_rate": 0.0,
+          "legacy_promote_rate": 0.03,
+          "mean_observations_used": 218.76
+        },
+        {
+          "true_relative_mae_change": 0.10995737467714384,
+          "promote_rate": 0.0,
+          "legacy_promote_rate": 0.0,
+          "mean_observations_used": 150.935
+        },
+        {
+          "true_relative_mae_change": 0.17858451886501725,
+          "promote_rate": 0.0,
+          "legacy_promote_rate": 0.0,
+          "mean_observations_used": 150.0
+        },
+        {
+          "true_relative_mae_change": 0.3260429892630754,
+          "promote_rate": 0.0,
+          "legacy_promote_rate": 0.0,
+          "mean_observations_used": 150.0
+        }
+      ]
+    }
+  }
+}
