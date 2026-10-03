@@ -1,0 +1,30 @@
+{
+  "name": "serving_ridge_uncapped",
+  "description": "Status quo before this work: live-loop 9-feature contract, linear ridge, raw (uncapped) RUL target.",
+  "datasets": [
+    "FD001",
+    "FD002",
+    "FD003",
+    "FD004"
+  ],
+  "cv_folds": 5,
+  "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "rul_cap": null,
+  "features": {
+    "set": "serving"
+  },
+  "model": {
+    "type": "ridge",
+    "grid": {
+      "alpha": [
+        0.5
+      ]
+    }
+  }
+}

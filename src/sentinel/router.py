@@ -69,42 +69,64 @@ class CanaryRouter:
         self._canary_errors.clear()
 
     def _decide_if_ready(self) -> str | None:
-        """Paired non-inferiority test on shadow absolute errors.
-
-        With d_i = |canary_i| - |production_i| and margin = tolerance * production MAE:
-        promote when the upper confidence bound of mean(d) is within the margin, roll back when
-        the lower bound exceeds it, and otherwise keep collecting evidence. If the evidence is
-        still inconclusive at `max_observations`, the canary is rolled back (production is kept).
-        """
-        observations = len(self._canary_errors)
-        if observations < self.min_observations:
+        outcome, evidence = non_inferiority_decision(
+            self._production_errors,
+            self._canary_errors,
+            tolerance=self.regression_tolerance,
+            min_observations=self.min_observations,
+            max_observations=self.max_observations,
+            z_score=self.z_score,
+        )
+        if outcome is None:
             return None
-        production = np.asarray(self._production_errors)
-        differences = np.asarray(self._canary_errors) - production
-        mean_difference = float(differences.mean())
-        standard_error = float(differences.std(ddof=1) / np.sqrt(observations))
-        margin = self.regression_tolerance * float(production.mean())
-        upper = mean_difference + self.z_score * standard_error
-        lower = mean_difference - self.z_score * standard_error
-        if upper <= margin:
-            outcome = "promoted"
-        elif lower > margin or observations >= self.max_observations:
-            outcome = "rolled_back"
-        else:
-            return None
-        self.last_evidence = {
-            "observations": observations,
-            "production_mae": float(production.mean()),
-            "canary_mae": float(np.mean(self._canary_errors)),
-            "mean_difference": mean_difference,
-            "ci_lower": lower,
-            "ci_upper": upper,
-            "margin": margin,
-            "reason": "inconclusive" if lower <= margin < upper else outcome,
-        }
+        self.last_evidence = evidence
         self.reset_evidence()
         if outcome == "promoted":
             self.registry.promote()
         else:
             self.registry.rollback()
         return outcome
+
+
+def non_inferiority_decision(
+    production_errors: list[float] | np.ndarray,
+    canary_errors: list[float] | np.ndarray,
+    tolerance: float,
+    min_observations: int,
+    max_observations: int,
+    z_score: float = 1.96,
+) -> tuple[str | None, dict[str, float | int | str] | None]:
+    """Paired non-inferiority test on shadow absolute errors.
+
+    With d_i = |canary_i| - |production_i| and margin = tolerance * production MAE: promote when
+    the upper confidence bound of mean(d) is within the margin, roll back when the lower bound
+    exceeds it, and otherwise keep collecting evidence (None). Evidence that is still
+    inconclusive at `max_observations` rolls the canary back so production is kept.
+    """
+
+    observations = len(canary_errors)
+    if observations < min_observations:
+        return None, None
+    production = np.asarray(production_errors, dtype=float)
+    differences = np.asarray(canary_errors, dtype=float) - production
+    mean_difference = float(differences.mean())
+    standard_error = float(differences.std(ddof=1) / np.sqrt(observations))
+    margin = tolerance * float(production.mean())
+    upper = mean_difference + z_score * standard_error
+    lower = mean_difference - z_score * standard_error
+    if upper <= margin:
+        outcome = "promoted"
+    elif lower > margin or observations >= max_observations:
+        outcome = "rolled_back"
+    else:
+        return None, None
+    return outcome, {
+        "observations": observations,
+        "production_mae": float(production.mean()),
+        "canary_mae": float(np.mean(canary_errors)),
+        "mean_difference": mean_difference,
+        "ci_lower": lower,
+        "ci_upper": upper,
+        "margin": margin,
+        "reason": "inconclusive" if lower <= margin < upper else outcome,
+    }

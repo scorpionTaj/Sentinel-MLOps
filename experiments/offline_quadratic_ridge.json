@@ -1,0 +1,40 @@
+{
+  "name": "offline_quadratic_ridge",
+  "description": "Offline features plus squared terms, ridge.",
+  "datasets": [
+    "FD001",
+    "FD002",
+    "FD003",
+    "FD004"
+  ],
+  "cv_folds": 5,
+  "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "rul_cap": 125,
+  "features": {
+    "set": "offline",
+    "regimes": "auto",
+    "window": 30,
+    "rolling": [
+      "mean",
+      "slope",
+      "std"
+    ]
+  },
+  "model": {
+    "type": "quadratic_ridge",
+    "grid": {
+      "alpha": [
+        10,
+        100,
+        1000,
+        10000
+      ]
+    }
+  }
+}

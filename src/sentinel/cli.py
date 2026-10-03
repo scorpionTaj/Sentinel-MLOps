@@ -141,22 +141,59 @@ def run_benchmark(reference_dir: Path | None = None) -> dict[str, object]:
     }
 
 
+def run_evaluations(configs: list[Path] | None, reference_dir: Path, out_dir: Path) -> None:
+    from sentinel.evaluation.experiment import run_experiment
+
+    for config in configs or sorted(Path("experiments").glob("*.json")):
+        result = run_experiment(config, reference_dir, out_dir)
+        for domain, outcome in result["results"].items():
+            test = outcome["test"]
+            print(
+                f"{result['name']:<26} {domain}  cv_rmse={outcome['cv_rmse']['mean']:6.2f}  "
+                f"test_rmse={test['rmse']['mean']:6.2f}±{test['rmse']['std']:.2f}  "
+                f"nasa={test['nasa_score']['mean']:8.0f}  ({outcome['runtime_seconds']}s)",
+                flush=True,
+            )
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Run the Sentinel self-healing MLOps demo")
-    parser.add_argument("command", choices=["demo", "matrix", "benchmark"])
+    parser.add_argument(
+        "command", choices=["demo", "matrix", "benchmark", "evaluate", "calibrate", "report"]
+    )
     parser.add_argument("--scenario", choices=["promote", "rollback"], default="promote")
     parser.add_argument("--state-dir", type=Path)
     parser.add_argument("--reset", action="store_true")
+    parser.add_argument("--config", type=Path, action="append", help="experiment JSON (repeatable)")
+    parser.add_argument("--reference-dir", type=Path, default=Path("data/reference"))
+    parser.add_argument("--out", type=Path, help="write the JSON result to this path")
+    parser.add_argument("--trials", type=int, default=200, help="Monte Carlo trials (calibrate)")
     args = parser.parse_args()
-    if args.command == "matrix":
+    if args.command == "report":
+        from sentinel.evaluation.report import write_report
+
+        destination = args.out or Path("docs/EVALUATION.md")
+        print(f"wrote {write_report(Path('reports'), args.reference_dir, destination)}")
+        return
+    if args.command == "evaluate":
+        run_evaluations(args.config, args.reference_dir, args.out or Path("reports/experiments"))
+        return
+    if args.command == "calibrate":
+        from sentinel.evaluation.drift_calibration import run_calibration
+
+        result = run_calibration(args.reference_dir, args.trials)
+    elif args.command == "matrix":
         result = run_dataset_matrix()
     elif args.command == "benchmark":
-        result = run_benchmark()
+        result = run_benchmark(args.reference_dir)
     elif args.state_dir is None:
         with tempfile.TemporaryDirectory(prefix="sentinel-") as temporary:
             result = run_demo(Path(temporary), args.scenario)
     else:
         result = run_demo(args.state_dir, args.scenario, args.reset)
+    if args.out is not None:
+        args.out.parent.mkdir(parents=True, exist_ok=True)
+        args.out.write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
     print(json.dumps(result, indent=2))
 
 

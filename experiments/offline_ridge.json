@@ -1,0 +1,41 @@
+{
+  "name": "offline_ridge",
+  "description": "All informative sensors, per-regime normalization, 30-cycle rolling mean/slope/std, linear ridge.",
+  "datasets": [
+    "FD001",
+    "FD002",
+    "FD003",
+    "FD004"
+  ],
+  "cv_folds": 5,
+  "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "rul_cap": 125,
+  "features": {
+    "set": "offline",
+    "regimes": "auto",
+    "window": 30,
+    "rolling": [
+      "mean",
+      "slope",
+      "std"
+    ]
+  },
+  "model": {
+    "type": "ridge",
+    "grid": {
+      "alpha": [
+        1,
+        10,
+        100,
+        1000,
+        10000
+      ]
+    }
+  }
+}

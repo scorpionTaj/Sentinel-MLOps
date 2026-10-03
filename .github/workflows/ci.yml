@@ -17,9 +17,10 @@ jobs:
           python-version: "3.13"
           cache: pip
       - run: pip install ".[dev]"
-      - run: ruff check src tests
+      - run: ruff check src tests scripts
       - run: pytest
       - run: node tests/test_web_file_mode.mjs
       - run: python -m sentinel demo --scenario promote
       - run: python -m sentinel demo --scenario rollback
       - run: python -m sentinel matrix
+      - run: python -m sentinel report --out /tmp/EVALUATION.md
