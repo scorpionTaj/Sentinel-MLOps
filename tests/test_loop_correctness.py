@@ -68,6 +68,35 @@ class LoopCorrectnessTests(unittest.TestCase):
         self.assertGreater(max(report.feature_shift.values()), 5.0)
 
 
+    def test_concept_drift_with_stable_inputs_triggers_retraining(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            loop = HealingLoop(Path(temporary), HealingConfig(canary_min_observations=300))
+            loop.bootstrap(generate_telemetry("FD001", engines=8, cycles=45, seed=10))
+            for seed, offset in ((1099, 100), (2099, 300)):
+                loop.process(generate_telemetry("FD002", 6, 35, seed=seed, engine_offset=offset))
+            self.assertEqual(loop.registry.version("production"), 2)
+            stable = loop.process(generate_telemetry("FD002", 6, 35, seed=7, engine_offset=600))
+            inverted = loop.process(
+                generate_telemetry("ADVERSARIAL", 6, 35, seed=8, engine_offset=900)
+            )
+        self.assertNotIn("performance_degraded", [e.kind for e in stable.events])
+        self.assertFalse(inverted.drift.detected)
+        self.assertEqual(
+            [e.kind for e in inverted.events][1:], ["performance_degraded", "canary_started"]
+        )
+
+    def test_status_exposes_ui_histories(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            loop = HealingLoop(Path(temporary), HealingConfig(canary_min_observations=300))
+            loop.bootstrap(generate_telemetry("FD001", engines=8, cycles=45, seed=10))
+            loop.process(generate_telemetry("FD002", 6, 35, seed=20, engine_offset=100))
+            status = loop.status()
+        self.assertEqual(status["pipeline_events"][0]["kind"], "bootstrapped")
+        self.assertEqual(status["drift_history"][0]["verdict"], "detected")
+        self.assertEqual(status["canary_progress"]["observations"], 210)
+        self.assertEqual(status["canary_progress"]["min_observations"], 300)
+
+
 class CanaryDecisionTests(unittest.TestCase):
     def _router(self, temporary: str, **kwargs: object) -> CanaryRouter:
         registry = FileModelRegistry(Path(temporary) / "registry.json")

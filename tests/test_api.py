@@ -76,3 +76,13 @@ class ApiIntegrationTests(unittest.TestCase):
                     response = client.post(f"/simulate-drift?domain={dataset['id']}")
                 self.assertEqual(response.status_code, 200)
                 self.assertTrue(response.json()["drift"]["detected"])
+
+    def test_canary_spans_two_demo_batches_so_rollback_is_reachable(self) -> None:
+        first = self.client.post("/simulate-drift?domain=FD002").json()
+        self.assertIn("canary_started", [event["kind"] for event in first["events"]])
+        status = self.client.get("/status").json()
+        self.assertIsNotNone(status["canary_progress"])
+        rollback = self.client.post("/simulate-regression").json()
+        self.assertIn("rolled_back", [event["kind"] for event in rollback["events"]])
+        self.assertEqual(self.client.get("/status").json()["aliases"], {"production": 1})
+

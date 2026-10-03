@@ -38,22 +38,25 @@
     "canary_version": 2,
     "events": [
       {
-        "sequence": 1,
-        "kind": "drift_scored",
-        "detail": "PSI scored for validated batch",
-        "value": 4.09610193629274
-      },
-      {
         "sequence": 2,
-        "kind": "drift_detected",
-        "detail": "threshold breached",
-        "value": 4.09610193629274
+        "kind": "drift_scored",
+        "detail": "70 rows \u00b7 PSI 4.096 vs alert line 0.409 \u00b7 detected",
+        "value": 4.09610193629274,
+        "version": null
       },
       {
         "sequence": 3,
+        "kind": "drift_detected",
+        "detail": "PSI 4.096 \u2265 0.409; largest shift on operating_condition (29.09\u03c3)",
+        "value": 4.09610193629274,
+        "version": null
+      },
+      {
+        "sequence": 4,
         "kind": "canary_started",
-        "detail": "version 2 passed offline gate",
-        "value": 3.4120461806966578
+        "detail": "offline gate passed: validation MAE 3.412 vs production 6.915 on 35 held-out rows",
+        "value": 3.4120461806966578,
+        "version": 2
       }
     ]
   },
@@ -94,16 +97,18 @@
     "canary_version": null,
     "events": [
       {
-        "sequence": 4,
+        "sequence": 5,
         "kind": "drift_scored",
-        "detail": "PSI scored for validated batch",
-        "value": 4.09610193629274
+        "detail": "70 rows \u00b7 PSI 4.096 vs alert line 0.409 \u00b7 detected",
+        "value": 4.09610193629274,
+        "version": null
       },
       {
-        "sequence": 5,
+        "sequence": 6,
         "kind": "rolled_back",
-        "detail": "rolled_back: canary MAE 26.746 vs production 8.087, paired diff CI [10.928, 26.391] margin 0.243, n=100",
-        "value": null
+        "detail": "canary MAE 26.746 vs production 8.087, paired diff CI [10.928, 26.391] margin 0.243, n=100",
+        "value": null,
+        "version": 2
       }
     ]
   },
@@ -167,6 +172,7 @@
       },
       "counters": {
         "sentinel_bootstrap_total": 1.0,
+        "sentinel_batches_total": 2.0,
         "sentinel_drift_breaches_total": 1.0,
         "sentinel_retrains_total": 1.0,
         "sentinel_fault_injections_total": 1.0,
@@ -209,7 +215,86 @@
       "ci_upper": 26.39093003381243,
       "margin": 0.24260633979420387,
       "reason": "rolled_back"
-    }
+    },
+    "canary_progress": null,
+    "pipeline_events": [
+      {
+        "sequence": 1,
+        "kind": "bootstrapped",
+        "detail": "trained on 360 rows \u00b7 train MAE 1.392, engine-holdout MAE 1.982",
+        "value": 1.9822907471978275,
+        "version": 1,
+        "batch": 0,
+        "domain": ""
+      },
+      {
+        "sequence": 2,
+        "kind": "drift_scored",
+        "detail": "70 rows \u00b7 PSI 4.096 vs alert line 0.409 \u00b7 detected",
+        "value": 4.09610193629274,
+        "version": null,
+        "batch": 1,
+        "domain": "FD002"
+      },
+      {
+        "sequence": 3,
+        "kind": "drift_detected",
+        "detail": "PSI 4.096 \u2265 0.409; largest shift on operating_condition (29.09\u03c3)",
+        "value": 4.09610193629274,
+        "version": null,
+        "batch": 1,
+        "domain": "FD002"
+      },
+      {
+        "sequence": 4,
+        "kind": "canary_started",
+        "detail": "offline gate passed: validation MAE 3.412 vs production 6.915 on 35 held-out rows",
+        "value": 3.4120461806966578,
+        "version": 2,
+        "batch": 1,
+        "domain": "FD002"
+      },
+      {
+        "sequence": 5,
+        "kind": "drift_scored",
+        "detail": "70 rows \u00b7 PSI 4.096 vs alert line 0.409 \u00b7 detected",
+        "value": 4.09610193629274,
+        "version": null,
+        "batch": 2,
+        "domain": "FD002"
+      },
+      {
+        "sequence": 6,
+        "kind": "rolled_back",
+        "detail": "canary MAE 26.746 vs production 8.087, paired diff CI [10.928, 26.391] margin 0.243, n=100",
+        "value": null,
+        "version": 2,
+        "batch": 2,
+        "domain": "FD002"
+      }
+    ],
+    "drift_history": [
+      {
+        "batch": 1,
+        "domain": "FD002",
+        "rows": 70,
+        "psi": 4.09610193629274,
+        "alert_line": 0.40874247308442074,
+        "verdict": "detected",
+        "top_feature": "operating_condition",
+        "error_ratio": 4.369448375122811
+      },
+      {
+        "batch": 2,
+        "domain": "FD002",
+        "rows": 70,
+        "psi": 4.09610193629274,
+        "alert_line": 0.40874247308442074,
+        "verdict": "detected",
+        "top_feature": "operating_condition",
+        "error_ratio": 3.1118097567319474
+      }
+    ]
   },
-  "metrics": "# TYPE sentinel_canary_version gauge\nsentinel_canary_version 2.0\n# TYPE sentinel_drift_psi gauge\nsentinel_drift_psi 4.09610193629274\n# TYPE sentinel_holdout_mae gauge\nsentinel_holdout_mae 1.9822907471978275\n# TYPE sentinel_model_version gauge\nsentinel_model_version 1.0\n# TYPE sentinel_training_mae gauge\nsentinel_training_mae 1.3915435298322716\n# TYPE sentinel_bootstrap_total counter\nsentinel_bootstrap_total 1.0\n# TYPE sentinel_drift_breaches_total counter\nsentinel_drift_breaches_total 1.0\n# TYPE sentinel_fault_injections_total counter\nsentinel_fault_injections_total 1.0\n# TYPE sentinel_retrains_total counter\nsentinel_retrains_total 1.0\n# TYPE sentinel_rollbacks_total counter\nsentinel_rollbacks_total 1.0\n"
+  "metrics": "# TYPE sentinel_canary_version gauge\nsentinel_canary_version 2.0\n# TYPE sentinel_drift_psi gauge\nsentinel_drift_psi 4.09610193629274\n# TYPE sentinel_holdout_mae gauge\nsentinel_holdout_mae 1.9822907471978275\n# TYPE sentinel_model_version gauge\nsentinel_model_version 1.0\n# TYPE sentinel_training_mae gauge\nsentinel_training_mae 1.3915435298322716\n# TYPE sentinel_batches_total counter\nsentinel_batches_total 2.0\n# TYPE sentinel_bootstrap_total counter\nsentinel_bootstrap_total 1.0\n# TYPE sentinel_drift_breaches_total counter\nsentinel_drift_breaches_total 1.0\n# TYPE sentinel_fault_injections_total counter\nsentinel_fault_injections_total 1.0\n# TYPE sentinel_retrains_total counter\nsentinel_retrains_total 1.0\n# TYPE sentinel_rollbacks_total counter\nsentinel_rollbacks_total 1.0\n"
 }

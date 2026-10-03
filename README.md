@@ -25,9 +25,12 @@ curl -X POST http://localhost:8000/simulate-drift
 ```
 
 Open [http://localhost:8000](http://localhost:8000)—do not open `index.html` directly—for the
-minimal control-room web app. It exposes
-the same real drift, canary, promotion, and rollback endpoints used by the command-line demos. The
-demo controls and their reset endpoint are intentionally bound to localhost by Compose.
+control-room web app. It polls `/status` every 4 seconds and shows the evidence behind every
+decision: PSI per batch against the batch-size-aware alert line, per-feature PSI and mean shift,
+the canary's paired confidence interval against the promotion margin, and a timeline of pipeline
+events with their details. The demo runs entirely on synthetic telemetry (210-row fleet batches);
+real NASA C-MAPSS results live in [EVALUATION.md](docs/EVALUATION.md). The demo controls and their
+reset endpoint are intentionally bound to localhost by Compose.
 
 The dashboard discovers its choices from `GET /datasets`. It includes FD002–FD004 plus sensor-bias,
 sensor-dropout, noise-burst, and adversarial-inversion stress scenarios. After starting the stack,

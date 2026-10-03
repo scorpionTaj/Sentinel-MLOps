@@ -64,6 +64,10 @@ class CanaryRouter:
             return Prediction(canary_value, canary_version, "canary", decision)
         return Prediction(production_value, production_version, "production", decision)
 
+    @property
+    def observations(self) -> int:
+        return len(self._canary_errors)
+
     def reset_evidence(self) -> None:
         self._production_errors.clear()
         self._canary_errors.clear()

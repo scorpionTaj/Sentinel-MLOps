@@ -36,6 +36,9 @@ def check(base_url: str) -> None:
                 continue
             scenario_id = str(dataset["id"])
             encoded = urllib.parse.quote(scenario_id)
+            # Each regime is checked against the FD001 baseline; after a promotion the drift
+            # reference legitimately moves to the promoted model's data.
+            request(base_url, "/demo/reset", "POST")
             result = request(base_url, f"/simulate-drift?domain={encoded}", "POST")
             drift = result.get("drift")
             quality = result.get("quality")

@@ -244,7 +244,11 @@ def _synthetic_section(reports: Path) -> list[str]:
             for event in demo[batch]["events"]
             if event["kind"] in {"promoted", "rolled_back"}
         ]
-        detail = events[-1]["detail"] if events else "no release decision"
+        detail = (
+            f"{events[-1]['kind'].replace('_', ' ')}: {events[-1]['detail']}"
+            if events
+            else "no release decision"
+        )
         lines.append(
             f"- `make {'demo' if scenario == 'promote' else 'rollback'}` → aliases "
             f"`{demo['status']['aliases']}`; {detail}"
