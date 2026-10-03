@@ -135,8 +135,10 @@ def _calibration_section(reports: Path) -> list[str]:
     real = calibration.get("real")
     if real:
         lines += [
-            f"**False-alarm rate on real data** ({real['reference']} as reference, "
-            f"{real['holdout']} as batches)",
+            (
+                f"**False-alarm rate on real data** ({real['reference']} as reference, "
+                f"{real['holdout']} as batches)"
+            ),
             "",
         ]
         rows = []
@@ -181,8 +183,11 @@ def _calibration_section(reports: Path) -> list[str]:
     canary = calibration.get("canary")
     if canary:
         lines += [
-            "**Canary operating characteristic** (real FD001 shadow errors; tolerance "
-            f"{_pct(canary['tolerance'])}): probability of promotion vs the canary's true MAE change",
+            (
+                "**Canary operating characteristic** (real FD001 shadow errors; tolerance "
+                f"{_pct(canary['tolerance'])}): probability of promotion vs the canary's true "
+                "MAE change"
+            ),
             "",
         ]
         for minimum, rows_data in canary["curves"].items():

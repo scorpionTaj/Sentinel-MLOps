@@ -132,7 +132,7 @@ def evaluate_dataset(config: dict[str, object], domain: str, reference_dir: Path
     return {
         "domain": domain,
         "train_rows": len(train),
-        "train_engines": int(len(np.unique(train.engine))),
+        "train_engines": len(np.unique(train.engine)),
         "test_engines": int(last.sum()),
         "feature_count": int(x_train.shape[1]),
         "selection": {

@@ -8,6 +8,7 @@ serving contract of the live loop and API.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from itertools import pairwise
 
 import numpy as np
 
@@ -50,7 +51,7 @@ def rolling_statistics(
     slope = np.zeros_like(values)
     std = np.zeros_like(values)
     boundaries = np.flatnonzero(np.r_[True, engine[1:] != engine[:-1], True])
-    for start, stop in zip(boundaries[:-1], boundaries[1:], strict=True):
+    for start, stop in pairwise(boundaries):
         y = values[start:stop]
         t = np.arange(stop - start, dtype=float)[:, None]
 
