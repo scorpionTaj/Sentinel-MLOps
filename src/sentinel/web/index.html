@@ -33,7 +33,7 @@
             <svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor" aria-hidden="true">
               <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
             </svg>
-            <span>View source on GitHub</span>
+            <span class="github-label">View source on GitHub</span>
           </a>
           <div class="connection" id="connection"><span></span> Connecting</div>
         </div>
@@ -61,8 +61,10 @@
               <small id="dataset-description">Multiple operating conditions with one degradation mode.</small>
             </label>
             <button class="primary" id="drift-action"><span>01</span><span class="action-label" id="drift-action-label">Inject FD002 drift</span></button>
-            <button id="regression-action"><span>02</span> Corrupt active canary</button>
-            <button class="quiet" id="reset-action"><span>↻</span> Reset demo</button>
+            <button id="regression-action" aria-describedby="regression-hint"><span>02</span><span class="action-label">Corrupt active canary</span></button>
+            <small class="action-hint" id="regression-hint">Available while a canary is collecting shadow evidence.</small>
+            <button class="quiet" id="reset-action"><span>↻</span><span class="action-label">Reset demo</span></button>
+            <p class="next-step" id="next-step" role="status" aria-live="polite"></p>
           </div>
         </section>
 
@@ -75,26 +77,60 @@
           <article class="signal">
             <p>Canary model</p>
             <strong id="canary-version">—</strong>
+            <div class="meter progress" aria-hidden="true"><span id="canary-meter"></span></div>
             <small id="canary-state">No candidate deployed</small>
           </article>
           <article class="signal">
-            <p>Drift / PSI</p>
+            <p>Drift / PSI <span class="verdict" id="drift-verdict"></span></p>
             <strong id="drift-score">0.000</strong>
-            <div class="meter" aria-hidden="true"><span id="drift-meter"></span><i></i></div>
-            <small id="drift-detail">Safety threshold 0.250</small>
+            <div class="meter" aria-hidden="true"><span id="drift-meter"></span><i id="drift-tick"></i></div>
+            <small id="drift-detail">No batch scored yet</small>
           </article>
           <article class="signal">
             <p>Validated Gold rows</p>
             <strong id="gold-rows">—</strong>
-            <small>Quality-gated observations</small>
+            <small id="batch-count">Quality-gated observations</small>
+          </article>
+        </section>
+
+        <section class="evidence">
+          <article class="panel">
+            <div class="panel-heading">
+              <div><p class="eyebrow">DRIFT EVIDENCE</p><h2>Why the detector fired</h2></div>
+            </div>
+            <div class="panel-body">
+              <h3>PSI per batch <small>dashed line: alert line = max(0.20, sampling-noise floor)</small></h3>
+              <div class="chart" id="psi-chart" role="img" aria-label="PSI per batch"></div>
+              <h3>Latest batch by feature <small>bar: PSI · right: mean shift in reference σ</small></h3>
+              <div class="feature-bars" id="feature-bars"></div>
+              <details class="table-view">
+                <summary>Table view</summary>
+                <div id="drift-table"></div>
+              </details>
+            </div>
+          </article>
+
+          <article class="panel">
+            <div class="panel-heading">
+              <div><p class="eyebrow">CANARY EVIDENCE</p><h2>Release decision</h2></div>
+            </div>
+            <div class="panel-body">
+              <div class="chart" id="canary-chart" role="img" aria-label="Canary confidence interval"></div>
+              <dl class="facts" id="canary-facts"></dl>
+              <p class="explainer">
+                Every row is scored by both models in shadow. d = |canary error| − |production error|.
+                Promote when the 95% upper bound of mean(d) stays under the margin (3% of production
+                MAE); roll back when the lower bound exceeds it; otherwise keep collecting.
+              </p>
+            </div>
           </article>
         </section>
 
         <section class="workspace">
           <article class="panel timeline-panel">
             <div class="panel-heading">
-              <div><p class="eyebrow">RELEASE EVIDENCE</p><h2>Model timeline</h2></div>
-              <span class="live-pill">LIVE</span>
+              <div><p class="eyebrow">RELEASE EVIDENCE</p><h2>Pipeline timeline</h2></div>
+              <span class="live-pill" id="live-pill">LIVE</span>
             </div>
             <ol class="timeline" id="timeline" aria-live="polite"></ol>
           </article>
@@ -108,12 +144,16 @@
               <div><span>Promotions</span><strong id="promotion-count">0</strong></div>
               <div><span>Rollbacks</span><strong id="rollback-count">0</strong></div>
             </div>
+            <a class="quality-link" href="https://github.com/scorpionTaj/Sentinel-MLOps/blob/main/docs/EVALUATION.md" target="_blank" rel="noopener noreferrer">
+              Model quality on real NASA C-MAPSS →
+              <small>The demo runs on synthetic telemetry; real-data RMSE, drift and canary calibration live in the evaluation report.</small>
+            </a>
           </aside>
         </section>
       </main>
 
       <footer><span>SENTINEL · NUMPY + FASTAPI + PROMETHEUS / GRAFANA</span><span>PLANNED SCALE-OUT SEAMS: KAFKA · SPARK · DELTA · DAGSTER · MLFLOW</span></footer>
     </div>
-    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <div class="tooltip" id="tooltip" role="tooltip" hidden></div>
   </body>
 </html>

@@ -3,10 +3,10 @@
   "records_evaluated": 74390,
   "fd001_rows": 20631,
   "fd002_rows": 53759,
-  "load_time_seconds": 0.5742,
-  "bootstrap_time_seconds": 0.3278,
-  "batch_inference_and_drift_time_seconds": 0.0705,
-  "canary_evaluation_time_seconds": 0.0562,
+  "load_time_seconds": 0.6522,
+  "bootstrap_time_seconds": 0.394,
+  "batch_inference_and_drift_time_seconds": 0.104,
+  "canary_evaluation_time_seconds": 0.0852,
   "initial_production_version": 1,
   "drift_psi": 6.005,
   "drift_detected": true,
@@ -28,6 +28,7 @@
     },
     "counters": {
       "sentinel_bootstrap_total": 1.0,
+      "sentinel_batches_total": 2.0,
       "sentinel_drift_breaches_total": 1.0,
       "sentinel_retrains_total": 1.0,
       "sentinel_promotions_total": 1.0

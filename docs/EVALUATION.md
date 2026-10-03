@@ -171,17 +171,17 @@ negative control)
 | ADVERSARIAL | yes | yes | 4.511 | 30.15 | drift_detected, canary_started |
 
 - `make demo` → aliases `{'production': 2}`; promoted: canary MAE 2.746 vs production 8.087, paired diff CI [-6.375, -4.307] margin 0.243, n=100
-- `make rollback` → aliases `{'production': 1}`; rolled_back: canary MAE 26.746 vs production 8.087, paired diff CI [10.928, 26.391] margin 0.243, n=100
+- `make rollback` → aliases `{'production': 1}`; rolled back: canary MAE 26.746 vs production 8.087, paired diff CI [10.928, 26.391] margin 0.243, n=100
 
 ## 4. Runtime on real data
 
 | Measure | Value |
 |:---|:---|
 | Real rows loaded (FD001 + FD002 train) | 74,390 |
-| Load time | 0.574 s |
-| Bootstrap on FD001 (fit + reference) | 0.328 s |
-| 500-row FD002 batch: score + retrain + canary | 0.070 s |
-| Next 500-row batch | 0.056 s |
+| Load time | 0.652 s |
+| Bootstrap on FD001 (fit + reference) | 0.394 s |
+| 500-row FD002 batch: score + retrain + canary | 0.104 s |
+| Next 500-row batch | 0.085 s |
 | Drift PSI on first FD002 batch | 6.005 |
 | Events | drift_scored, drift_detected, canary_started, promoted, drift_scored |
 

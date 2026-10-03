@@ -21,6 +21,8 @@ from sentinel.loop import HealingConfig, HealingLoop
 from sentinel.scenarios import all_scenarios, drift_scenario_ids, get_scenario
 from sentinel.synthetic import generate_telemetry
 
+DEMO_ENGINES = 6
+
 
 class PredictionRequest(BaseModel):
     features: list[float] = Field(min_length=len(FEATURE_NAMES), max_length=len(FEATURE_NAMES))
@@ -59,8 +61,10 @@ def _resolve_runtime_dir(state_dir: Path | None = None) -> Path:
 def create_app(state_dir: Path | None = None) -> FastAPI:
     app = FastAPI(title="Sentinel Self-Healing MLOps", version="0.1.0")
     runtime_dir = _resolve_runtime_dir(state_dir)
+    # Demo batches hold DEMO_ENGINES * 35 = 210 rows, so a 300-observation canary spans two
+    # batches: the first click starts it, the second (or /simulate-regression) decides it.
     config = HealingConfig(
-        canary_min_observations=int(os.getenv("SENTINEL_CANARY_OBSERVATIONS", "150"))
+        canary_min_observations=int(os.getenv("SENTINEL_CANARY_OBSERVATIONS", "300"))
     )
     web_dir = Path(__file__).resolve().parent / "web"
     if not web_dir.exists():
@@ -154,30 +158,27 @@ def create_app(state_dir: Path | None = None) -> FastAPI:
     def simulate_drift(
         domain: str = Query(default="FD002", pattern=drift_pattern)
     ) -> dict[str, object]:
-        target_domain = domain.upper()
-        scenario = get_scenario(target_domain)
-        ref_file = Path("data/reference") / f"train_{target_domain}.txt"
-        if scenario.category == "cmapps" and ref_file.exists():
-            from sentinel.datasets import load_cmapps_training
-
-            all_rows = load_cmapps_training(ref_file, target_domain)
-            gold_count = int(loop().status()["gold_rows"])
-            start_idx = gold_count % max(1, len(all_rows) - 150)
-            rows = all_rows[start_idx : start_idx + 150]
-        else:
-            seed = scenario.seed
-            offset = 500 + int(loop().status()["gold_rows"])
-            rows = generate_telemetry(domain, engines=3, cycles=35, seed=seed, engine_offset=offset)
-        return loop().process(rows).to_dict()
+        # The demo stays on one data source (the synthetic generator the loop was bootstrapped
+        # on). Real C-MAPSS rows have different sensor units, so mixing them in would compare a
+        # synthetic-scale model against real-scale targets. Real data is evaluated offline.
+        scenario = get_scenario(domain.upper())
+        return loop().process(_demo_batch(scenario.id, scenario.seed)).to_dict()
 
     @app.post("/simulate-regression")
     def simulate_regression() -> dict[str, object]:
         if loop().registry.version("canary") is None:
             raise HTTPException(status_code=409, detail="start a canary with /simulate-drift first")
         loop().inject_canary_regression()
+        return loop().process(_demo_batch("FD002", 100)).to_dict()
+
+    def _demo_batch(domain: str, seed: int) -> list:
+        # A fleet cross-section of DEMO_ENGINES whole trajectories. The seed advances with every
+        # batch so repeated clicks sample new engines instead of replaying identical rows.
+        batch = int(loop().status()["metrics"]["counters"].get("sentinel_batches_total", 0))
         offset = 500 + int(loop().status()["gold_rows"])
-        rows = generate_telemetry("FD002", engines=3, cycles=35, seed=100, engine_offset=offset)
-        return loop().process(rows).to_dict()
+        return generate_telemetry(
+            domain, engines=DEMO_ENGINES, cycles=35, seed=seed + 1000 * batch, engine_offset=offset
+        )
 
     @app.post("/demo/reset")
     def reset_demo() -> dict[str, object]:

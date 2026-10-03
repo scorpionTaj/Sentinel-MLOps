@@ -52,6 +52,7 @@ class PipelineEvent:
     kind: str
     detail: str
     value: float | None = None
+    version: int | None = None
 
     def to_dict(self) -> dict[str, object]:
         return asdict(self)

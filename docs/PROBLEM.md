@@ -26,6 +26,13 @@ index, so a batch of shorter engine histories would look like drift without any 
 - After a promotion, the reference is re-fitted on the promoted model's training window, so the
   new regime becomes the baseline.
 
+### Second trigger: performance degradation (concept drift)
+PSI only sees input distributions. A regime can keep every input distribution and still break the
+model; `ADVERSARIAL` inverts the sensor-to-RUL relationship, and after an FD002 promotion it scores
+PSI ≈ 0.08. Because each batch arrives with labels, the loop also compares production MAE on the
+batch with the model's recorded validation MAE. At ≥ 4× (stable batches measure 1.4–3.0×) it emits
+`performance_degraded` and retrains exactly as for a PSI breach.
+
 Each report also carries `feature_shift` (|Δmean| in reference σ), an unbounded effect size that
 keeps ranking severity once binned PSI saturates. Measured false-alarm and detection rates are in
 [EVALUATION.md](EVALUATION.md) §2.
