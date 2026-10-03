@@ -7,7 +7,7 @@ import tempfile
 from pathlib import Path
 
 from sentinel.loop import HealingConfig, HealingLoop
-from sentinel.scenarios import drift_scenarios
+from sentinel.scenarios import drift_scenarios, get_scenario
 from sentinel.synthetic import generate_telemetry
 
 
@@ -43,8 +43,14 @@ def run_demo(state_dir: Path, scenario: str, reset: bool = False) -> dict[str, o
 
 
 def run_dataset_matrix() -> dict[str, object]:
+    """Score every drift regime plus an FD001 negative control against the FD001 reference.
+
+    The control uses the same generator with a different seed and shorter engine histories, so
+    it must *not* alert; it guards against false alarms from sampling noise or time features.
+    """
     outcomes: dict[str, object] = {}
-    for index, scenario in enumerate(drift_scenarios(), start=1):
+    cases = [(get_scenario("FD001"), 77), *((s, s.seed) for s in drift_scenarios())]
+    for index, (scenario, seed) in enumerate(cases, start=1):
         domain = scenario.id
         with tempfile.TemporaryDirectory(prefix=f"sentinel-{domain.lower()}-") as temporary:
             loop = HealingLoop(
@@ -57,13 +63,15 @@ def run_dataset_matrix() -> dict[str, object]:
                     domain,
                     engines=3,
                     cycles=35,
-                    seed=scenario.seed,
+                    seed=seed,
                     engine_offset=index * 100,
                 )
             )
             outcomes[domain] = {
+                "expected_detected": scenario.injectable,
                 "detected": result.drift.detected,
                 "psi": result.drift.aggregate_psi,
+                "max_standardized_shift": max(result.drift.feature_shift.values()),
                 "event_kinds": [event.kind for event in result.events],
                 "canary_version": result.canary_version,
             }

@@ -6,7 +6,8 @@ from pathlib import Path
 import numpy as np
 
 from sentinel.drift import PSIDriftDetector
-from sentinel.features import RollingFeaturePipeline
+from sentinel.evaluation.splits import group_split
+from sentinel.features import MONITORED_FEATURES, MONITORED_INDEX, RollingFeaturePipeline
 from sentinel.metrics import Metrics
 from sentinel.model import RidgeModel, mae
 from sentinel.quality import DataQualityError, QualityGate
@@ -17,12 +18,18 @@ from sentinel.types import BatchResult, DriftReport, FeatureRow, PipelineEvent, 
 
 @dataclass(frozen=True, slots=True)
 class HealingConfig:
-    drift_threshold: float = 0.25
+    drift_threshold: float = 0.2
+    drift_warning_threshold: float | None = None
     offline_regression_tolerance: float = 0.05
     canary_weight: float = 0.1
     canary_min_observations: int = 50
+    canary_max_observations: int | None = None
     canary_regression_tolerance: float = 0.03
     minimum_retrain_rows: int = 30
+    validation_fraction: float = 0.3
+    # Piecewise-linear RUL target: early-life cycles are indistinguishable from healthy ones,
+    # so training and shadow evaluation both cap the target (standard C-MAPSS practice).
+    rul_cap: float | None = 125.0
 
 
 class HealingLoop:
@@ -32,7 +39,11 @@ class HealingLoop:
         self.config = config or HealingConfig()
         self.features = RollingFeaturePipeline()
         self.quality = QualityGate()
-        self.drift = PSIDriftDetector(threshold=self.config.drift_threshold)
+        self.drift = PSIDriftDetector(
+            threshold=self.config.drift_threshold,
+            feature_names=MONITORED_FEATURES,
+            warning_threshold=self.config.drift_warning_threshold,
+        )
         self.registry = FileModelRegistry(state_dir / "registry.json")
         self.metrics = Metrics()
         self.router = CanaryRouter(
@@ -40,11 +51,13 @@ class HealingLoop:
             weight=self.config.canary_weight,
             min_observations=self.config.canary_min_observations,
             regression_tolerance=self.config.canary_regression_tolerance,
+            max_observations=self.config.canary_max_observations,
         )
         self._sequence = 0
         self._gold: list[FeatureRow] = []
         self._bootstrapped = False
         self._last_drift: DriftReport | None = None
+        self._canary_reference: np.ndarray | None = None
 
     def bootstrap(self, rows: list[TelemetryRow]) -> int:
         if self._bootstrapped:
@@ -54,15 +67,20 @@ class HealingLoop:
         x, y = self._matrix(gold)
         existing_version = self.registry.version("production")
         if existing_version is None:
+            train, holdout = group_split([row.group for row in gold], self.config.validation_fraction)
+            holdout_mae = mae(RidgeModel.fit(x[train], y[train]), x[holdout], y[holdout])
             model = RidgeModel.fit(x, y)
             baseline_mae = mae(model, x, y)
-            version = self.registry.register(model, {"training_mae": baseline_mae}, "candidate")
+            version = self.registry.register(
+                model, {"training_mae": baseline_mae, "holdout_mae": holdout_mae}, "candidate"
+            )
             self.registry.deploy_initial(version)
             self.metrics.gauge("sentinel_training_mae", baseline_mae)
+            self.metrics.gauge("sentinel_holdout_mae", holdout_mae)
             self.metrics.increment("sentinel_bootstrap_total")
         else:
             version = existing_version
-        self.drift.fit_reference(x)
+        self.drift.fit_reference(self._monitored(x))
         self._gold.extend(gold)
         self._bootstrapped = True
         self.metrics.gauge("sentinel_model_version", version)
@@ -80,10 +98,13 @@ class HealingLoop:
             raise
         self._gold.extend(features)
         x, _ = self._matrix(features)
-        drift = self.drift.score(x)
+        drift = self.drift.score(self._monitored(x))
         self._last_drift = drift
         self.metrics.gauge("sentinel_drift_psi", drift.aggregate_psi)
         events.append(self._event("drift_scored", "PSI scored for validated batch", drift.aggregate_psi))
+        if drift.warning:
+            self.metrics.increment("sentinel_drift_warnings_total")
+            events.append(self._event("drift_warning", "moderate shift logged", drift.aggregate_psi))
 
         if drift.detected and self.registry.version("canary") is None:
             self.metrics.increment("sentinel_drift_breaches_total")
@@ -92,16 +113,24 @@ class HealingLoop:
             events.append(candidate_event)
 
         for row in features:
-            prediction = self.router.predict(row.values, row.request_id, actual=row.target)
+            prediction = self.router.predict(
+                row.values, row.request_id, actual=self._cap(row.target)
+            )
             if prediction.decision == "promoted":
                 self.metrics.increment("sentinel_promotions_total")
                 self.metrics.gauge(
                     "sentinel_model_version", self.registry.version("production") or 0
                 )
-                events.append(self._event("promoted", "canary outperformed production"))
+                # The promoted model defines the new normal: drift is now measured against the
+                # data it was trained on, otherwise every later batch would re-trigger retraining.
+                if self._canary_reference is not None:
+                    self.drift.fit_reference(self._canary_reference)
+                    self._canary_reference = None
+                events.append(self._event("promoted", self._evidence_detail("non-inferior")))
             elif prediction.decision == "rolled_back":
                 self.metrics.increment("sentinel_rollbacks_total")
-                events.append(self._event("rolled_back", "canary regression detected"))
+                self._canary_reference = None
+                events.append(self._event("rolled_back", self._evidence_detail("regression")))
 
         return BatchResult(
             quality=quality,
@@ -145,16 +174,20 @@ class HealingLoop:
             "gold_rows": len(self._gold),
             "metrics": self.metrics.snapshot(),
             "last_drift": self._last_drift.to_dict() if self._last_drift is not None else None,
+            "last_canary_evidence": self.router.last_evidence,
         }
 
     def _retrain(self, recent: list[FeatureRow]) -> PipelineEvent:
         if len(recent) < self.config.minimum_retrain_rows:
             return self._event("retrain_skipped", "insufficient recent Gold rows", float(len(recent)))
-        split = max(2, int(len(recent) * 0.7))
-        train = recent[:split]
-        validation = recent[split:]
-        train_x, train_y = self._matrix(train)
-        validation_x, validation_y = self._matrix(validation)
+        x, y = self._matrix(recent)
+        train, validation = group_split(
+            [row.group for row in recent], self.config.validation_fraction
+        )
+        if len(train) < 2 or len(validation) < 1:
+            return self._event("retrain_skipped", "not enough engines to validate", float(len(recent)))
+        train_x, train_y = x[train], y[train]
+        validation_x, validation_y = x[validation], y[validation]
         candidate = RidgeModel.fit(train_x, train_y)
         candidate_mae = mae(candidate, validation_x, validation_y)
         production_mae = mae(self.registry.model("production"), validation_x, validation_y)
@@ -170,6 +203,7 @@ class HealingLoop:
             return self._event("candidate_rejected", f"version {version} failed offline gate", candidate_mae)
         self.registry.start_canary(version)
         self.router.reset_evidence()
+        self._canary_reference = self._monitored(x)
         self.metrics.gauge("sentinel_canary_version", version)
         return self._event("canary_started", f"version {version} passed offline gate", candidate_mae)
 
@@ -177,9 +211,27 @@ class HealingLoop:
         self._sequence += 1
         return PipelineEvent(self._sequence, kind, detail, value)
 
-    @staticmethod
-    def _matrix(rows: list[FeatureRow]) -> tuple[np.ndarray, np.ndarray]:
+    def _evidence_detail(self, fallback: str) -> str:
+        evidence = self.router.last_evidence
+        if not evidence:
+            return fallback
         return (
-            np.asarray([row.values for row in rows], dtype=float),
-            np.asarray([row.target for row in rows], dtype=float),
+            f"{evidence['reason']}: canary MAE {evidence['canary_mae']:.3f} vs production "
+            f"{evidence['production_mae']:.3f}, paired diff CI "
+            f"[{evidence['ci_lower']:.3f}, {evidence['ci_upper']:.3f}] "
+            f"margin {evidence['margin']:.3f}, n={evidence['observations']}"
         )
+
+    def _cap(self, target: float) -> float:
+        cap = self.config.rul_cap
+        return target if cap is None else min(target, cap)
+
+    @staticmethod
+    def _monitored(x: np.ndarray) -> np.ndarray:
+        return x[:, MONITORED_INDEX]
+
+    def _matrix(self, rows: list[FeatureRow]) -> tuple[np.ndarray, np.ndarray]:
+        target = np.asarray([row.target for row in rows], dtype=float)
+        if self.config.rul_cap is not None:
+            target = np.minimum(target, self.config.rul_cap)
+        return np.asarray([row.values for row in rows], dtype=float), target
