@@ -2,6 +2,12 @@
 
 > Sentinel is a self-healing MLOps reference pipeline: PSI-based drift detection triggers automated retraining, offline validation, canary release, and evidence-driven promotion/rollback — deterministic end-to-end demo, FastAPI/Prometheus/Grafana observability profile, with a documented scale-out path (Kafka/Spark/Delta/Dagster/MLflow).
 
+**Live demo: [sentinel-mlops-ma.vercel.app](https://sentinel-mlops-ma.vercel.app)**, the control
+room and API ([OpenAPI docs](https://sentinel-mlops-ma.vercel.app/docs)) on Vercel's free tier.
+Its state lives in the function's memory: it is shared by everyone using the demo at that moment and
+starts over after a cold start or a click on Reset. Prometheus and Grafana run only in the local
+Compose profile.
+
 The real running stack executes locally in under a second with a pure **NumPy core loop**, **FastAPI serving**, and an optional **Prometheus + Grafana** Docker Compose observability profile. Distributed infrastructure tools (Kafka/Redpanda, Spark, Delta Lake, Dagster, MLflow) are explicitly documented scale-out seams in [`docs/DECISIONS.md`](docs/DECISIONS.md), not running background services.
 
 ![Sentinel architecture: the in-process self-healing loop, FastAPI serving and observability, and the offline data-science workflow on NASA C-MAPSS](docs/architecture.svg)
